@@ -1,29 +1,21 @@
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Code, Palette, Rocket, Users } from 'lucide-vue-next';
 
-const features = [
-  {
-    icon: Code,
-    title: 'Clean Code',
-    description: 'Menulis kode yang rapi, terstruktur dan mudah dimaintain',
-  },
-  {
-    icon: Palette,
-    title: 'Creative Design',
-    description: 'Mendesain interface yang menarik dan user-friendly',
-  },
-  {
-    icon: Rocket,
-    title: 'Fast Performance',
-    description: 'Optimasi performa untuk pengalaman pengguna terbaik',
-  },
-  {
-    icon: Users,
-    title: 'Collaboration',
-    description: 'Bekerja sama dalam tim dengan komunikasi yang baik',
-  },
-];
+const { t, tm, rt } = useI18n();
+
+const features = computed(() => {
+  const rawFeatures = tm('about.features');
+  const icons = [Code, Palette, Rocket, Users];
+
+  return Array.isArray(rawFeatures) ? rawFeatures.map((feature, index) => ({
+    ...feature,
+    title: rt(feature.title),
+    description: rt(feature.description),
+    icon: icons[index]
+  })) : [];
+});
 
 const sectionScroll = {
   initial: { opacity: 0, y: 50 },
@@ -33,7 +25,6 @@ const sectionScroll = {
     transition: { duration: 600 }
   }
 };
-
 </script>
 
 <template>
@@ -41,8 +32,11 @@ const sectionScroll = {
       v-motion
       :initial="{ opacity: 0, y: 100 }"
       :visibleOnce="{ opacity: 1, y: 0, transition: { duration: 800 } }"
-      id="about" class="py-20 relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"></div>
+      id="about" class="py-20 relative overflow-hidden transition-colors duration-500 bg-white dark:bg-slate-950">
+
+    <div class="absolute inset-0 z-0 opacity-30 dark:opacity-10">
+      <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px]"></div>
+    </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
@@ -52,29 +46,24 @@ const sectionScroll = {
           :visible-once="sectionScroll.visibleOnce"
           class="text-center mb-16"
       >
-        <h2 class="text-4xl sm:text-5xl font-bold mb-4">
-          Tentang <span class="text-gradient">Saya</span>
+        <h2 class="text-4xl sm:text-5xl font-bold mb-4 text-slate-900 dark:text-white">
+          {{ t('about.title_part1') }} <span class="text-gradient">{{ t('about.title_part2') }}</span>
         </h2>
-        <div class="w-20 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"></div>
+        <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-sky-500 mx-auto rounded-full"></div>
       </div>
 
       <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
-
         <div
             v-motion
             :initial="{ opacity: 0, x: -50 }"
-            :visible-once="{
-            opacity: 1,
-            x: 0,
-            transition: { duration: 600, delay: 200 }
-          }"
+            :visible-once="{ opacity: 1, x: 0, transition: { duration: 600, delay: 200 } }"
         >
           <div class="relative group">
-            <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-sky-500 rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
             <img
                 src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop"
                 alt="Developer workspace"
-                class="relative rounded-2xl shadow-2xl w-full h-96 object-cover"
+                class="relative rounded-2xl shadow-2xl w-full h-96 object-cover border border-white/10"
             />
           </div>
         </div>
@@ -82,35 +71,34 @@ const sectionScroll = {
         <div
             v-motion
             :initial="{ opacity: 0, x: 50 }"
-            :visible-once="{
-            opacity: 1,
-            x: 0,
-            transition: { duration: 600, delay: 400 }
-          }"
+            :visible-once="{ opacity: 1, x: 0, transition: { duration: 600, delay: 400 } }"
             class="space-y-6"
         >
-          <h3 class="text-3xl font-bold text-purple-400">Passionate Developer & Designer</h3>
-          <p class="text-gray-300 text-lg leading-relaxed">
-            Saya adalah seorang developer yang passionate dalam menciptakan pengalaman digital yang luar biasa.
-            Dengan fokus pada pengembangan aplikasi web yang tidak hanya fungsional tapi juga aesthetic.
+          <h3 class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+            {{ t('about.subtitle') }}
+          </h3>
+
+
+          <p class="text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
+            {{ t('about.desc_1') }}
           </p>
-          <p class="text-gray-300 text-lg leading-relaxed">
-            Saya percaya bahwa kombinasi antara desain yang indah dan kode yang efisien adalah kunci untuk
-            menciptakan produk yang sukses.
+          <p class="text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
+            {{ t('about.desc_2') }}
           </p>
 
-          <div class="flex flex-wrap gap-4">
-            <span class="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-lg text-purple-400">
-              5+ Tahun Pengalaman
-            </span>
-            <span class="px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-lg text-pink-400">
-              50+ Project Selesai
-            </span>
-            <span class="px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-400">
-              30+ Klien Puas
-            </span>
+          <div class="flex flex-wrap gap-4 pt-2">
+            <div class="flex flex-col">
+              <span class="text-blue-600 dark:text-blue-400 font-black text-2xl tracking-tighter italic">2+</span>
+              <span class="text-[10px] text-slate-500 uppercase font-bold">{{ t('about.stats.exp') }}</span>
+            </div>
+            <div class="h-10 w-[1px] bg-slate-200 dark:bg-white/10 mx-2"></div>
+            <div class="flex flex-col">
+              <span class="text-blue-600 dark:text-blue-400 font-black text-2xl tracking-tighter italic">20+</span>
+              <span class="text-[10px] text-slate-500 uppercase font-bold">{{ t('about.stats.projects') }}</span>
+            </div>
           </div>
         </div>
+
       </div>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -119,16 +107,12 @@ const sectionScroll = {
             :key="feature.title"
             v-motion
             :initial="{ opacity: 0, y: 30 }"
-            :visible-once="{
-            opacity: 1,
-            y: 0,
-            transition: { duration: 600, delay: 600 + (index * 100) }
-          }"
-            class="p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300 hover:-translate-y-2"
+            :visible-once="{ opacity: 1, y: 0, transition: { duration: 600, delay: 600 + (index * 100) } }"
+            class="p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-200 dark:border-blue-500/10 hover:border-blue-500/40 transition-all duration-300 hover:-translate-y-2 group"
         >
-          <component :is="feature.icon" class="w-12 h-12 text-purple-400 mb-4" />
-          <h4 class="text-xl font-semibold mb-2">{{ feature.title }}</h4>
-          <p class="text-gray-400">{{ feature.description }}</p>
+          <component :is="feature.icon" class="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
+          <h4 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">{{ feature.title }}</h4>
+          <p class="text-slate-600 dark:text-gray-400">{{ feature.description }}</p>
         </div>
       </div>
     </div>

@@ -1,0 +1,59 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "about": "Tentang",
+    "skills": "Keahlian",
+    "projects": "Proyek",
+    "contact": "Kontak",
+    "cta": "Hubungi Saya"
+  },
+  "hero": {
+    "hello": "Halo, Saya",
+    "roles": ["Pengembang Full Stack", "Insinyur Machine Learning"],
+    "desc": "Saya pengembang Android, Web, dan Machine Learning yang fokus pada aplikasi cerdas dengan kode bersih.",
+    "projects_btn": "Lihat Proyek",
+    "cv_btn": "Unduh CV"
+  },
+  "about": {
+    "title_part1": "Tentang",
+    "title_part2": "Saya",
+    "subtitle": "Fullstack Developer & JavaScript Specialist",
+    "desc_1": "Saya adalah seorang Fullstack Developer dengan 2 tahun pengalaman dalam membangun aplikasi web yang dinamis dan skalabel. Fokus utama saya adalah pada ekosistem JavaScript, mulai dari frontend hingga backend.",
+    "desc_2": "Saya sangat antusias dalam menulis kode yang efisien menggunakan framework modern. Bagi saya, JavaScript bukan sekadar bahasa pemrograman, melainkan alat utama untuk mengubah ide kompleks menjadi solusi digital yang nyata.",
+    "stats": {
+      "exp": "2 Tahun Pengalaman",
+      "projects": "20+ Proyek Selesai"
+    }
+  },
+  "skills": {
+    "title_part1": "Keahlian",
+    "title_part2": "Saya",
+    "subtitle": "Teknologi dan tools yang saya gunakan untuk membangun aplikasi cerdas dan skalabel.",
+    "learning_label": "Sedang Mendalami Riset & Teknologi Baru:"
+  },
+  "projects": {
+    "title_part1": "Proyek",
+    "title_part2": "Saya",
+    "subtitle": "Eksplorasi karya saya dalam pengembangan Web, Mobile, hingga implementasi Artificial Intelligence.",
+    "more_btn": "Lihat Semua Proyek",
+    "items": [
+      {
+        "title": "SantriConnect Management System",
+        "desc": "Sistem manajemen digital untuk pondok pesantren yang mencakup absensi, nilai, dan manajemen santri."
+      },
+      {
+        "title": "Plant Disease Detector",
+        "desc": "Aplikasi Android berbasis AI untuk mendeteksi penyakit tanaman secara real-time melalui kamera ponsel."
+      }
+    ]
+  },
+  "contact": {
+    "title_part1": "Hubungi",
+    "title_part2": "Saya",
+    "subtitle": "Punya project atau ide menarik? Mari diskusi dan wujudkan bersama!",
+    "connect_title": "Mari Terhubung",
+    "connect_desc": "Saya selalu terbuka untuk diskusi tentang proyek baru, peluang kreatif, atau kerjasama sebagai Fullstack Developer.",
+    "send_btn": "Kirim Pesan"
+  }
+}
+

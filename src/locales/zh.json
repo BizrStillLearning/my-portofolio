@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "首页",
+    "about": "关于我",
+    "skills": "技能",
+    "projects": "项目",
+    "contact": "联系我们",
+    "cta": "联系我"
+  },
+  "hero": {
+    "hello": "您好，我是",
+    "roles": ["全栈开发工程师", "机器学习工程师"],
+    "desc": "我是一名专注于开发智能应用和编写简洁代码的 Android、Web 和机器学习开发人员。",
+    "projects_btn": "查看项目",
+    "cv_btn": "下载简历"
+  },
+  "about": {
+    "title_part1": "关于",
+    "title_part2": "我",
+    "subtitle": "Fullstack Developer & JavaScript Specialist",
+    "desc_1": "我是一名全栈开发工程师，拥有两年构建动态可扩展Web应用程序的经验。我的主要工作领域是JavaScript生态系统，涵盖前端到后端.",
+    "desc_2": "我热衷于使用现代框架编写高效代码。对我而言，JavaScript 不仅仅是一门编程语言，更是将复杂想法转化为切实可行的数字解决方案的关键工具.",
+    "stats": {
+      "exp": "两年工作经验",
+      "projects": "已完成20多个项目"
+    }
+  },
+  "skills": {
+    "title_part1": "技能",
+    "title_part2": "我",
+    "subtitle": "我用来构建智能且可扩展应用程序的技术和工具。",
+    "learning_label": "探索研究与新技术 : "
+  },
+  "projects": {
+    "title_part1": "项目",
+    "title_part2": "我",
+    "subtitle": "探索我在Web开发、移动应用和人工智能实现方面的作品。",
+    "more_btn": "查看所有项目",
+    "items": [
+      {
+        "title": "SantriConnect Management System",
+        "desc": "一个面向伊斯兰寄宿学校的数字化管理系统，包含考勤、成绩和学生管理功能。"
+      },
+      {
+        "title": "Plant Disease Detector",
+        "desc": "一款基于人工智能的安卓应用程序，可通过手机摄像头实时检测植物病害。"
+      }
+    ]
+  },
+  "contact": {
+    "title_part1": "联系方式",
+    "title_part2": "我",
+    "subtitle": "有有趣的项目或想法吗？让我们一起探讨，共同实现！",
+    "connect_title": "联系我们",
+    "connect_desc": "作为一名全栈开发人员，我始终乐于探讨新的项目、创意机会或合作。",
+    "send_btn": "发送消息"
+  }
+}

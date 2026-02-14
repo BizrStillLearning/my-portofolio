@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "skills": "Skills",
+    "projects": "Projects",
+    "contact": "Contact",
+    "cta": "Contact Me"
+  },
+  "hero": {
+    "hello": "Hello, I'm",
+    "roles": ["Full Stack Developer", "Machine Learning Engineer"],
+    "desc": "I am an Android, Web, and Machine Learning Developer focused on smart applications with clean code.",
+    "projects_btn": "View Projects",
+    "cv_btn": "Download CV"
+  },
+  "about": {
+    "title_part1": "About",
+    "title_part2": "Me",
+    "subtitle": "Fullstack Developer & JavaScript Specialist",
+    "desc_1": "I am a Fullstack Developer with 2 years of experience in building dynamic and scalable web applications. My main focus is on the JavaScript ecosystem, from frontend to backend.",
+    "desc_2": "I am passionate about writing efficient code using modern frameworks. For me, JavaScript is not just a programming language, but a key tool for turning complex ideas into tangible digital solutions.",
+    "stats": {
+      "exp": "2 Years Experience",
+      "projects": "20+ Completed Projects"
+    }
+  },
+  "skills": {
+    "title_part1": "Skills",
+    "title_part2": "Me",
+    "subtitle": "Technologies and tools I use to build intelligent and scalable applications.",
+    "learning_label": "Exploring Research & New Technologies:"
+  },
+  "projects": {
+    "title_part1": "Project",
+    "title_part2": "Me",
+    "subtitle": "Explore my work in Web development, Mobile, to Artificial Intelligence implementation.",
+    "more_btn": "View All Projects",
+    "items": [
+      {
+        "title": "SantriConnect Management System",
+        "desc": "A digital management system for Islamic boarding schools that includes attendance, grades, and student management."
+      },
+      {
+        "title": "Plant Disease Detector",
+        "desc": "AI-based Android application to detect plant diseases in real-time through mobile phone camera."
+      }
+    ]
+  },
+  "contact": {
+    "title_part1": "Contact",
+    "title_part2": "Me",
+    "subtitle": "Have an interesting project or idea? Let's discuss and make it happen together!",
+    "connect_title": "Let's Connect",
+    "connect_desc": "I'm always open to discussing new projects, creative opportunities, or collaboration as a Fullstack Developer.",
+    "send_btn": "Send Message"
+  }
+}
