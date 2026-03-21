@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "홈",
+    "about": "회사 소개",
+    "skills": "기술",
+    "projects": "프로젝트",
+    "contact": "연락처",
+    "cta": "연락하기"
+  },
+  "hero": {
+    "hello": "안녕하세요, 저는",
+    "roles": ["풀스택 개발자", "머신러닝 엔지니어"],
+    "desc": "저는 깔끔한 코드로 지능형 애플리케이션 개발에 집중하는 안드로이드, 웹 및 머신러닝 개발자입니다.",
+    "projects_btn": "프로젝트 보기",
+    "cv_btn": "이력서 다운로드"
+  },
+  "about": {
+    "title_part1": "에 대한",
+    "title_part2": "나",
+    "subtitle": "Fullstack Developer & JavaScript Specialist",
+    "desc_1": "저는 동적이고 확장 가능한 웹 애플리케이션 개발 경력 2년의 풀스택 개발자입니다. 프런트엔드부터 백엔드까지 자바스크립트 생태계 전반에 걸쳐 전문성을 갖추고 있습니다.",
+    "desc_2": "저는 최신 프레임워크를 활용하여 효율적인 코드를 작성하는 데 열정적입니다. 저에게 자바스크립트는 단순한 프로그래밍 언어가 아니라, 복잡한 아이디어를 구체적인 디지털 솔루션으로 구현하는 핵심 도구입니다.",
+    "stats": {
+      "exp": "2년 경력",
+      "projects": "20개 이상의 프로젝트 완료"
+    }
+  },
+  "skills": {
+    "title_part1": "기술",
+    "title_part2": "나",
+    "subtitle": "지능적이고 확장 가능한 애플리케이션을 구축하는 데 사용하는 기술 및 도구",
+    "learning_label": "연구 및 신기술 탐구:"
+  },
+  "projects": {
+    "title_part1": "프로젝트",
+    "title_part2": "나",
+    "subtitle": "웹 개발, 모바일, 인공지능 구현에 이르기까지 제가 진행한 작업들을 살펴보세요.",
+    "more_btn": "모든 프로젝트 보기",
+    "items": [
+      {
+        "title": "SantriConnect Management System",
+        "desc": "출석, 성적, 학생 관리를 포함하는 이슬람 기숙학교용 디지털 관리 시스템"
+      },
+      {
+        "title": "Plant Disease Detector",
+        "desc": "휴대폰 카메라를 통해 실시간으로 식물 질병을 탐지하는 AI 기반 안드로이드 애플리케이션"
+      }
+    ]
+  },
+  "contact": {
+    "title_part1": "연락처",
+    "title_part2": "저",
+    "subtitle": "흥미로운 프로젝트나 아이디어가 있으신가요? 함께 논의하고 실현해 봅시다!",
+    "connect_title": "연락하기",
+    "connect_desc": "저는 풀스택 개발자로서 새로운 프로젝트, 창의적인 기회 또는 협업에 대해 언제든 논의할 준비가 되어 있습니다.",
+    "send_btn": "메시지 보내기"
+  }
+}
