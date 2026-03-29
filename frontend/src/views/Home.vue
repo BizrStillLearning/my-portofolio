@@ -10,6 +10,7 @@ import Projects from '../components/Project.vue';
 import Contact from '../components/Contact.vue';
 import Footer from '../components/Footer.vue';
 import ScrollToTop from '../components/ScrollToTop.vue';
+import Portofolio from "../components/Portofolio.vue";
 
 const isLoading = ref(true);
 
@@ -34,9 +35,9 @@ onMounted(() => {
     <Navbar />
 
     <main>
-      <Hero /> <About />
-      <Skills />
-      <Projects />
+      <Hero />
+      <About />
+      <Portofolio />
       <Contact />
     </main>
 

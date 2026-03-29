@@ -66,7 +66,8 @@ const sectionScroll = {
       :visible-once="{ opacity: 1, y: 0, transition: { duration: 800 } }"
       class="py-20 relative overflow-hidden transition-colors duration-500 bg-slate-50 dark:bg-slate-950"
   >
-    <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center"></div>
+    <div
+        class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       <div

@@ -2,8 +2,7 @@
   "nav": {
     "home": "Beranda",
     "about": "Tentang",
-    "skills": "Keahlian",
-    "projects": "Proyek",
+    "portfolio": "Portofolio",
     "contact": "Kontak",
     "cta": "Hubungi Saya"
   },
@@ -25,6 +24,63 @@
       "projects": "20+ Proyek Selesai"
     }
   },
+  "portfolio": {
+    "title_part1": "My",
+    "title_part2": "Portofolio",
+    "tabs": {
+      "projects": "Proyek",
+      "certificates": "Sertifikat",
+      "tech": "Teknologi"
+    },
+    "progress": "Progres",
+    "recent_activity": "Aktivitas Terbaru",
+    "details": "Detail",
+    "verify": "Verifikasi Sertifikat",
+    "certificates_list": [
+      {
+        "title": "Belajar Dasar AI",
+        "issuer": "Dicoding Indonesia",
+        "date": "Januari 2026",
+        "image": "/img/certs/ai.png",
+        "link": "https://www.dicoding.com/certificates/JMZVVKJJ3ZN9"
+      },
+      {
+        "title": "Memulai Pemrograman dengan Python",
+        "issuer": "Dicoding Indonesia",
+        "date": "Maret 2026",
+        "image": "/img/certs/python.png",
+        "link": "https://www.dicoding.com/certificates/GRX5W24MYZ0M"
+      },
+      {
+        "title": "Belajar Dasar Pemrograman Web",
+        "issuer": "Dicoding Indonesia",
+        "date": "Maret 2026",
+        "image": "/img/certs/web.png",
+        "link": "https://www.dicoding.com/certificates/QLZ992M0MZ5D"
+      },
+      {
+        "title": "Belajar Back-End Pemula dengan Javascript",
+        "issuer": "Dicoding Indonesia",
+        "date": "Feb 2026",
+        "image": "/img/certs/Be-pemula.png",
+        "link": "https://www.dicoding.com/certificates/JLX1VGGMNZ72"
+      },
+      {
+        "title": "Belajar Dasar Cloud dan Gen AI di AWS",
+        "issuer": "Dicoding Indonesia",
+        "date": "Feb 2026",
+        "image": "/img/certs/cloud.png",
+        "link": "https://www.dicoding.com/certificates/MRZMWDD6RPYQ"
+      },
+      {
+        "title": "Introduction to Financial Literacy",
+        "issuer": "Dicoding Indonesia",
+        "date": "Mar 2026",
+        "image": "/img/certs/finacial.png",
+        "link": "https://www.dicoding.com/certificates/RVZK0OY7OZD5"
+      }
+    ]
+  },
   "skills": {
     "title_part1": "Keahlian",
     "title_part2": "Saya",
@@ -32,18 +88,22 @@
     "learning_label": "Sedang Mendalami Riset & Teknologi Baru:"
   },
   "projects": {
-    "title_part1": "Proyek",
-    "title_part2": "Saya",
-    "subtitle": "Eksplorasi karya saya dalam pengembangan Web, Mobile, hingga implementasi Artificial Intelligence.",
-    "more_btn": "Lihat Semua Proyek",
     "items": [
       {
         "title": "SantriConnect Management System",
-        "desc": "Sistem manajemen digital untuk pondok pesantren yang mencakup absensi, nilai, dan manajemen santri."
+        "desc": "Sistem manajemen pesantren digital yang berfokus pada absensi, nilai, dan data santri.",
+        "timeline": [
+          { "month": "Mei 2025", "summary": "Finishing fitur Jurnal & Absensi secara real time" },
+          { "month": "Des 2025", "summary": "Perawatan BE dan update fitur absensi" }
+        ]
       },
       {
-        "title": "Plant Disease Detector",
-        "desc": "Aplikasi Android berbasis AI untuk mendeteksi penyakit tanaman secara real-time melalui kamera ponsel."
+        "title": "E Voting Platform",
+        "desc": "Sistem voting berbasis website untuk memudahkan pemilihan",
+        "timeline": [
+          { "month": "Jan 2025", "summary": "Perancangan ERD, Alur dan Design Pattern" },
+          { "month": "Feb 2025", "summary": "Penyempurnaan Frontend dan Implementasi ke Backend" }
+        ]
       }
     ]
   },

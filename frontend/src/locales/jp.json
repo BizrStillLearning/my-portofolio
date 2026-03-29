@@ -1,58 +1,56 @@
 {
   "nav": {
     "home": "ホーム",
-    "about": "会社概要",
-    "skills": "スキル",
-    "projects": "プロジェクト",
+    "about": "私について",
+    "portfolio": "ポートフォリオ",
     "contact": "お問い合わせ",
     "cta": "お問い合わせ"
   },
   "hero": {
     "hello": "こんにちは、私は",
     "roles": ["フルスタック開発者", "機械学習エンジニア"],
-    "desc": "私はAndroid、Web、機械学習の開発者で、クリーンなコードでインテリジェントなアプリケーションを開発することに注力しています。",
+    "desc": "Android、Web、機械学習の開発者として、クリーンなコードでスマートなアプリケーションを構築することに注力しています。",
     "projects_btn": "プロジェクトを見る",
     "cv_btn": "履歴書をダウンロード"
   },
   "about": {
-    "title_part1": "について",
-    "title_part2": "自分",
-    "subtitle": "Fullstack Developer & JavaScript Specialist",
-    "desc_1": "私はフルスタック開発者で、動的かつスケーラブルなウェブアプリケーションの構築に2年間携わってきました。フロントエンドからバックエンドまで、JavaScriptエコシステムを中心に開発に取り組んでいます。",
-    "desc_2": "最新のフレームワークを使って効率的なコードを書くことに情熱を注いでいます。私にとってJavaScriptは単なるプログラミング言語ではなく、複雑なアイデアを具体的なデジタルソリューションに変換するための重要なツールです。",
+    "title_part1": "私に",
+    "title_part2": "ついて",
+    "subtitle": "フルスタック開発者 & JavaScript スペシャリスト",
+    "desc_1": "動的でスケーラブルなウェブアプリケーションの構築において2年の経験を持つフルスタック開発者です。フロントエンドからバックエンドまで、JavaScriptのエコシステムを専門としています。",
+    "desc_2": "最新のフレームワークを使用して効率的なコードを書くことに情熱を持っています。私にとってJavaScriptは単なる言語ではなく、複雑なアイデアをデジタルの現実に変えるための主要なツールです。",
     "stats": {
       "exp": "2年の経験",
-      "projects": "20以上の完了したプロジェクト"
+      "projects": "20以上の完了プロジェクト"
     }
   },
-  "skills": {
-    "title_part1": "スキル",
-    "title_part2": "私自身",
-    "subtitle": "インテリジェントでスケーラブルなアプリケーションを構築するために使用するテクノロジーとツール。",
-    "learning_label": "研究と新技術の探求"
+  "portfolio": {
+    "title_part1": "私の",
+    "title_part2": "ポートフォリオ",
+    "tabs": { "projects": "プロジェクト", "certificates": "証明書", "tech": "技術" },
+    "verify": "証明書を確認",
+    "certificates_list": [
+      { "title": "AI基礎学習", "issuer": "Dicoding Indonesia", "date": "2026年1月", "image": "/img/certs/ai.png", "link": "https://www.dicoding.com/certificates/JMZVVKJJ3ZN9" },
+      { "title": "Pythonプログラミング入門", "issuer": "Dicoding Indonesia", "date": "2026年3月", "image": "/img/certs/python.png", "link": "https://www.dicoding.com/certificates/GRX5W24MYZ0M" }
+    ]
   },
   "projects": {
-    "title_part1": "プロジェクト",
-    "title_part2": "私",
-    "subtitle": "Web開発、モバイル、人工知能実装における私の仕事をご覧ください。",
-    "more_btn": "すべてのプロジェクトを表示",
     "items": [
       {
-        "title": "SantriConnect Management System",
-        "desc": "イスラム系寄宿学校向けのデジタル管理システム。出席、成績、生徒管理機能を備えています。"
-      },
-      {
-        "title": "Plant Disease Detector",
-        "desc": "携帯電話のカメラで植物病害をリアルタイムに検出するAIベースのAndroidアプリケーションです。"
+        "title": "SantriConnect 管理システム",
+        "desc": "出席管理、成績、生徒データを中心としたイスラム寄宿学校向けデジタル管理システム。",
+        "timeline": [
+          { "month": "2025年5月", "summary": "ジャーナルとリアルタイム出席機能の完成" }
+        ]
       }
     ]
   },
   "contact": {
-    "title_part1": "お問い合わせ",
-    "title_part2": "私",
-    "subtitle": "興味深いプロジェクトやアイデアをお持ちですか？ぜひ話し合い、一緒に実現させましょう！",
+    "title_part1": "お問い",
+    "title_part2": "合わせ",
+    "subtitle": "面白いプロジェクトやアイデアがありますか？一緒に実現しましょう！",
     "connect_title": "つながりましょう",
-    "connect_desc": "フルスタック開発者として、新しいプロジェクト、クリエイティブな機会、コラボレーションなどについて、いつでもお気軽にご相談ください。",
-    "send_btn": "メッセージを送信"
+    "connect_desc": "新しいプロジェクトやクリエイティブな機会、フルスタック開発者としてのコラボレーションについて、いつでもお話ししましょう。",
+    "send_btn": "メッセージ送信"
   }
 }

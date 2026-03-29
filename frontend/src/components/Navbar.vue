@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { Menu, X, Code2, Globe, Sun, Moon, ChevronDown } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
@@ -12,9 +12,11 @@ const route = useRoute();
 
 const isOpen = ref(false);
 const isLangOpen = ref(false);
+const activeSection = ref('home');
 
 const scrollY = ref(0);
-const animatedY = ref(0);
+const handleScroll = () => { scrollY.value = window.scrollY; };
+const isScrolled = computed(() => scrollY.value > 20);
 
 const languages = [
   { code: 'en', label: 'English', flag: '🇺🇸' },
@@ -28,37 +30,19 @@ const languages = [
 const navItems = [
   { key: 'home', href: '#home' },
   { key: 'about', href: '#about' },
-  { key: 'skills', href: '#skills' },
-  { key: 'projects', href: '#projects' },
+  { key: 'portfolio', href: '#portfolio' },
   { key: 'contact', href: '#contact' }
 ];
 
-const handleScroll = () => {
-  scrollY.value = window.scrollY;
-};
-
-const animate = () => {
-  const lerpFactor = 0.08;
-  animatedY.value += (scrollY.value - animatedY.value) * lerpFactor;
-  if (Math.abs(scrollY.value - animatedY.value) < 0.01) {
-    animatedY.value = scrollY.value;
-  }
-  requestAnimationFrame(animate);
-};
-
-const isScrolled = computed(() => scrollY.value > 20);
-
-const navTransform = computed(() => {
-  const limit = Math.min(animatedY.value, 100);
-  return {
-    transform: `translateY(${limit * 0.05}px) scale(${1 - limit * 0.0002})`,
-  };
-});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) activeSection.value = entry.target.id;
+  });
+}, { threshold: 0.5 });
 
 const changeLang = (newLang) => {
   locale.value = newLang;
   localStorage.setItem('user_lang', newLang);
-  router.push({ params: { lang: newLang }, hash: route.hash });
   isLangOpen.value = false;
   isOpen.value = false;
 };
@@ -74,161 +58,168 @@ const scrollToSection = (e, href) => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true });
-  animate();
   themeStore.applyTheme();
+  navItems.forEach(item => {
+    const el = document.querySelector(item.href);
+    if (el) observer.observe(el);
+  });
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
+  observer.disconnect();
 });
 </script>
 
 <template>
   <header
-      class="fixed left-1/2 -translate-x-1/2 z-[100] w-full px-4 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
-      :style="{ top: isScrolled ? '1.5rem' : '0rem' }"
+      class="fixed left-1/2 -translate-x-1/2 z-[100] w-full px-4 pointer-events-none transition-all duration-500"
+      :style="{ top: isScrolled ? '1.5rem' : '0.rem' }"
+      v-motion
+      :initial="{ y: -100, opacity: 0 }"
+      :enter="{ y: 0, opacity: 1, transition: { type: 'spring', stiffness: 200, damping: 25 } }"
   >
     <nav
-        :style="navTransform"
         :class="[
-        'mx-auto flex items-center justify-between border relative',
-        'transition-[max-width,padding,background-color,border-color,border-radius,box-shadow,backdrop-filter] duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]',
+        'mx-auto flex items-center justify-between border-none transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] pointer-events-auto',
         isScrolled
-          ? 'max-w-[1100px] bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] px-6 py-2 border-slate-200/50 dark:border-white/10 shadow-xl'
-          : 'max-w-full bg-transparent px-8 py-6 border-transparent shadow-none backdrop-blur-0'
+          ? 'w-[92%] max-w-[1100px] rounded-[2.5rem] px-6 py-2 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-xl bg-white/70 dark:bg-slate-900/80'
+          : 'w-full max-w-full rounded-none px-6 md:px-10 py-6 shadow-none backdrop-blur-0 bg-transparent'
       ]"
     >
-      <div class="flex items-center space-x-2 cursor-pointer group shrink-0" @click="scrollToSection($event, '#home')">
+      <div
+          class="flex items-center space-x-2 cursor-pointer group shrink-0"
+          @click="scrollToSection($event, '#home')"
+          v-motion
+          :hovered="{ scale: 1.05 }"
+      >
         <div class="bg-gradient-to-br from-blue-600 to-indigo-500 p-2 rounded-xl shadow-md group-hover:rotate-6 transition-transform">
           <Code2 class="w-5 h-5 text-white" />
         </div>
-        <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white transition-colors duration-500">
+        <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">
           Kaizer<span class="text-blue-600 dark:text-blue-400">dev</span>
         </span>
       </div>
 
-      <div class="hidden md:flex items-center bg-slate-100/50 dark:bg-white/10 border border-slate-200 dark:border-white/10 p-1 rounded-full backdrop-blur-sm">
+      <div class="hidden md:flex items-center bg-slate-100/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 p-1 rounded-full backdrop-blur-sm">
         <a
             v-for="item in navItems"
             :key="item.key"
             :href="item.href"
             @click="scrollToSection($event, item.href)"
-            class="px-5 py-1.5 text-sm font-semibold transition-all rounded-full text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-white dark:hover:bg-white/10"
+            class="px-5 py-1.5 text-sm font-bold transition-all rounded-full relative"
+            :class="[
+            activeSection === item.key
+              ? 'text-blue-600 dark:text-white bg-white dark:bg-white/20 shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white'
+          ]"
         >
           {{ t(`nav.${item.key}`) }}
         </a>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <div class="hidden lg:block relative lang-picker">
+        <div class="hidden lg:block relative">
           <button
               @click="isLangOpen = !isLangOpen"
-              class="flex items-center gap-2 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white text-[11px] font-bold rounded-full pl-4 pr-3 py-2 hover:bg-white dark:hover:bg-slate-700 active:scale-95 transition-all"
+              v-motion
+              :hovered="{ scale: 1.05 }"
+              :active="{ scale: 0.95 }"
+              class="flex items-center gap-2 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/50 dark:border-white/10 text-slate-700 dark:text-white text-[11px] font-bold rounded-full pl-4 pr-3 py-2"
           >
             <Globe class="w-4 h-4 text-blue-500" />
-            <span>{{ languages.find(l => l.code === locale)?.flag }}</span>
             <span class="uppercase">{{ locale }}</span>
             <ChevronDown class="w-3 h-3 transition-transform duration-300" :class="{ 'rotate-180': isLangOpen }" />
           </button>
 
-          <transition name="dropdown">
-            <div
-                v-if="isLangOpen"
-                class="absolute top-full right-0 mt-2 w-36 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden"
+          <div
+              v-if="isLangOpen"
+              v-motion
+              :initial="{ opacity: 0, y: -10, scale: 0.95 }"
+              :enter="{ opacity: 1, y: 0, scale: 1 }"
+              class="absolute top-full right-0 mt-3 w-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[110]"
+          >
+            <button
+                v-for="lang in languages"
+                :key="lang.code"
+                @click="changeLang(lang.code)"
+                class="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold transition-colors hover:bg-blue-50 dark:hover:bg-white/5"
+                :class="locale === lang.code ? 'text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-white/10' : 'text-slate-600 dark:text-slate-400'"
             >
-              <button
-                  v-for="lang in languages"
-                  :key="lang.code"
-                  @click="changeLang(lang.code)"
-                  class="w-full flex items-center justify-between px-4 py-2.5 text-[11px] font-bold transition-colors hover:bg-blue-50 dark:hover:bg-white/5"
-                  :class="locale === lang.code ? 'text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10' : 'text-slate-600 dark:text-slate-400'"
-              >
-                <div class="flex items-center gap-2">
-                  <span>{{ lang.flag }}</span>
-                  <span>{{ lang.label }}</span>
-                </div>
-              </button>
-            </div>
-          </transition>
+              <span>{{ lang.flag }}</span>
+              <span>{{ lang.label }}</span>
+            </button>
+          </div>
         </div>
 
         <button
             @click="themeStore.toggleTheme()"
-            class="p-2.5 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-blue-400 hover:bg-white dark:hover:bg-white/20 transition-all shadow-sm active:scale-90"
+            v-motion
+            :hovered="{ scale: 1.1, rotate: 15 }"
+            :active="{ scale: 0.9 }"
+            class="p-2.5 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200/50 dark:border-white/10 text-slate-600 dark:text-blue-400"
         >
-          <transition name="fade-icon" mode="out-in">
-            <Sun v-if="themeStore.isDark" :key="'sun'" class="w-5 h-5" />
-            <Moon v-else :key="'moon'" class="w-5 h-5" />
-          </transition>
+          <Sun v-if="themeStore.isDark" class="w-5 h-5" />
+          <Moon v-else class="w-5 h-5" />
         </button>
 
-        <button @click="isOpen = !isOpen" class="md:hidden p-2 text-slate-600 dark:text-white rounded-full transition-colors">
-          <component :is="isOpen ? X : Menu" class="w-6 h-6" />
+        <button
+            @click="isOpen = !isOpen"
+            v-motion
+            :active="{ scale: 0.9 }"
+            class="md:hidden p-2 text-slate-600 dark:text-white rounded-full"
+        >
+          <X v-if="isOpen" class="w-6 h-6" />
+          <Menu v-else class="w-6 h-6" />
         </button>
       </div>
 
-      <transition name="mobile-menu">
-        <div v-if="isOpen" class="absolute top-full left-0 right-0 mt-4 md:hidden bg-white/90 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-2xl z-[150]">
-          <div class="flex flex-col space-y-4">
-            <a
-                v-for="item in navItems"
-                :key="item.key"
-                :href="item.href"
-                @click="scrollToSection($event, item.href)"
-                class="px-4 py-3 text-slate-700 dark:text-slate-300 font-semibold hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-white/5 rounded-2xl transition"
-            >
-              {{ t(`nav.${item.key}`) }}
-            </a>
+      <div
+          v-if="isOpen"
+          v-motion
+          :initial="{ opacity: 0, y: -20, scale: 0.95 }"
+          :enter="{ opacity: 1, y: 0, scale: 1 }"
+          class="absolute top-full left-0 right-0 mt-4 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2rem] p-6 border border-slate-200 dark:border-white/10 shadow-2xl z-[150]"
+      >
+        <div class="flex flex-col space-y-2">
+          <a
+              v-for="item in navItems"
+              :key="item.key"
+              :href="item.href"
+              @click="scrollToSection($event, item.href)"
+              :class="[
+              'px-4 py-3 font-bold rounded-2xl transition-all',
+              activeSection === item.key
+                ? 'text-blue-600 bg-blue-50 dark:text-white dark:bg-white/10'
+                : 'text-slate-700 dark:text-slate-400'
+            ]"
+          >
+            {{ t(`nav.${item.key}`) }}
+          </a>
 
-            <div class="pt-4 border-t border-slate-200 dark:border-white/10">
-              <p class="text-[10px] uppercase font-bold text-slate-400 mb-3 px-2 tracking-widest">Select Language</p>
-              <div class="grid grid-cols-3 gap-2">
-                <button
-                    v-for="lang in languages"
-                    :key="lang.code"
-                    @click="changeLang(lang.code)"
-                    :class="locale === lang.code ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400'"
-                    class="py-2 rounded-xl text-[10px] font-bold uppercase transition active:scale-95"
-                >
-                  {{ lang.code }}
-                </button>
-              </div>
+          <div class="mt-4 pt-4 border-t border-slate-200 dark:border-white/10">
+            <p class="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-4 px-2">
+              Select Language
+            </p>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                  v-for="lang in languages"
+                  :key="lang.code"
+                  @click="changeLang(lang.code)"
+                  :class="[
+                  'flex flex-col items-center gap-1 p-3 rounded-xl transition-all border',
+                  locale === lang.code
+                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg'
+                    : 'bg-slate-50 dark:bg-white/5 border-transparent text-slate-600 dark:text-slate-400'
+                ]"
+              >
+                <span class="text-lg">{{ lang.flag }}</span>
+                <span class="text-[9px] font-black uppercase">{{ lang.code }}</span>
+              </button>
             </div>
           </div>
         </div>
-      </transition>
+      </div>
     </nav>
   </header>
 </template>
-
-<style scoped>
-.dropdown-enter-active, .dropdown-leave-active {
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-}
-.dropdown-enter-from, .dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-8px) scale(0.95);
-}
-
-.fade-icon-enter-active, .fade-icon-leave-active {
-  transition: all 0.3s ease;
-}
-.fade-icon-enter-from { opacity: 0; transform: rotate(-90deg) scale(0); }
-.fade-icon-leave-to { opacity: 0; transform: rotate(90deg) scale(0); }
-
-.mobile-menu-enter-active {
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-}
-.mobile-menu-leave-active {
-  transition: all 0.3s ease-in;
-}
-.mobile-menu-enter-from, .mobile-menu-leave-to {
-  opacity: 0;
-  transform: translateY(-20px) scale(0.95);
-}
-
-header, nav {
-  will-change: transform, top, max-width;
-  backface-visibility: hidden;
-}
-</style>

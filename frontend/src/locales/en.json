@@ -2,15 +2,14 @@
   "nav": {
     "home": "Home",
     "about": "About",
-    "skills": "Skills",
-    "projects": "Projects",
+    "portfolio": "Portfolio",
     "contact": "Contact",
-    "cta": "Contact Me"
+    "cta": "Hire Me"
   },
   "hero": {
-    "hello": "Hello, I'm",
+    "hello": "Hi, I'm",
     "roles": ["Full Stack Developer", "Machine Learning Engineer"],
-    "desc": "I am an Android, Web, and Machine Learning Developer focused on smart applications with clean code.",
+    "desc": "I am an Android, Web, and Machine Learning developer focused on building smart applications with clean code.",
     "projects_btn": "View Projects",
     "cv_btn": "Download CV"
   },
@@ -18,41 +17,60 @@
     "title_part1": "About",
     "title_part2": "Me",
     "subtitle": "Fullstack Developer & JavaScript Specialist",
-    "desc_1": "I am a Fullstack Developer with 2 years of experience in building dynamic and scalable web applications. My main focus is on the JavaScript ecosystem, from frontend to backend.",
-    "desc_2": "I am passionate about writing efficient code using modern frameworks. For me, JavaScript is not just a programming language, but a key tool for turning complex ideas into tangible digital solutions.",
+    "desc_1": "I am a Fullstack Developer with 2 years of experience in building dynamic and scalable web applications. My primary focus is on the JavaScript ecosystem, from frontend to backend.",
+    "desc_2": "I am passionate about writing efficient code using modern frameworks. To me, JavaScript is not just a language, but a primary tool for turning complex ideas into real digital solutions.",
     "stats": {
       "exp": "2 Years Experience",
-      "projects": "20+ Completed Projects"
+      "projects": "20+ Projects Completed"
     }
   },
-  "skills": {
-    "title_part1": "Skills",
-    "title_part2": "Me",
-    "subtitle": "Technologies and tools I use to build intelligent and scalable applications.",
-    "learning_label": "Exploring Research & New Technologies:"
+  "portfolio": {
+    "title_part1": "My",
+    "title_part2": "Portfolio",
+    "tabs": {
+      "projects": "Projects",
+      "certificates": "Certificates",
+      "tech": "Technology"
+    },
+    "progress": "Progress",
+    "recent_activity": "Recent Activity",
+    "details": "Details",
+    "verify": "Verify Certificate",
+    "certificates_list": [
+      { "title": "Basic AI Learning", "issuer": "Dicoding Indonesia", "date": "January 2026", "image": "/img/certs/ai.png", "link": "https://www.dicoding.com/certificates/JMZVVKJJ3ZN9" },
+      { "title": "Starting Programming with Python", "issuer": "Dicoding Indonesia", "date": "March 2026", "image": "/img/certs/python.png", "link": "https://www.dicoding.com/certificates/GRX5W24MYZ0M" },
+      { "title": "Basic Web Programming", "issuer": "Dicoding Indonesia", "date": "March 2026", "image": "/img/certs/web.png", "link": "https://www.dicoding.com/certificates/QLZ992M0MZ5D" },
+      { "title": "Beginner Back-End with Javascript", "issuer": "Dicoding Indonesia", "date": "Feb 2026", "image": "/img/certs/Be-pemula.png", "link": "https://www.dicoding.com/certificates/JLX1VGGMNZ72" },
+      { "title": "Basic Cloud and Gen AI on AWS", "issuer": "Dicoding Indonesia", "date": "Feb 2026", "image": "/img/certs/cloud.png", "link": "https://www.dicoding.com/certificates/MRZMWDD6RPYQ" },
+      { "title": "Introduction to Financial Literacy", "issuer": "Dicoding Indonesia", "date": "Mar 2026", "image": "/img/certs/finacial.png", "link": "https://www.dicoding.com/certificates/RVZK0OY7OZD5" }
+    ]
   },
   "projects": {
-    "title_part1": "Project",
-    "title_part2": "Me",
-    "subtitle": "Explore my work in Web development, Mobile, to Artificial Intelligence implementation.",
-    "more_btn": "View All Projects",
     "items": [
       {
         "title": "SantriConnect Management System",
-        "desc": "A digital management system for Islamic boarding schools that includes attendance, grades, and student management."
+        "desc": "Digital management system for Islamic boarding schools focusing on attendance, grades, and student data.",
+        "timeline": [
+          { "month": "May 2025", "summary": "Finishing Journal & Real-time Attendance features" },
+          { "month": "Dec 2025", "summary": "BE maintenance and attendance feature updates" }
+        ]
       },
       {
-        "title": "Plant Disease Detector",
-        "desc": "AI-based Android application to detect plant diseases in real-time through mobile phone camera."
+        "title": "E-Voting Platform",
+        "desc": "Web-based voting system to simplify election processes.",
+        "timeline": [
+          { "month": "Jan 2025", "summary": "Designing ERD, Flow, and Design Patterns" },
+          { "month": "Feb 2025", "summary": "Frontend refinement and Backend implementation" }
+        ]
       }
     ]
   },
   "contact": {
     "title_part1": "Contact",
     "title_part2": "Me",
-    "subtitle": "Have an interesting project or idea? Let's discuss and make it happen together!",
+    "subtitle": "Have an interesting project or idea? Let's talk and build it together!",
     "connect_title": "Let's Connect",
-    "connect_desc": "I'm always open to discussing new projects, creative opportunities, or collaboration as a Fullstack Developer.",
+    "connect_desc": "I am always open to discussing new projects, creative opportunities, or collaborations as a Fullstack Developer.",
     "send_btn": "Send Message"
   }
 }
