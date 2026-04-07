@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { Menu, X, Code2, Globe, Sun, Moon, ChevronDown } from 'lucide-vue-next';
+import { Menu, X, Code2, Globe, Sun, Moon, ChevronDown, LogIn } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import { useThemeStore } from '../stores/themeStore';
@@ -31,7 +31,7 @@ const navItems = [
   { key: 'home', href: '#home' },
   { key: 'about', href: '#about' },
   { key: 'portfolio', href: '#portfolio' },
-  { key: 'contact', href: '#contact' }
+  { key: 'contact', href: '#contact' },
 ];
 
 const observer = new IntersectionObserver((entries) => {
@@ -44,6 +44,11 @@ const changeLang = (newLang) => {
   locale.value = newLang;
   localStorage.setItem('user_lang', newLang);
   isLangOpen.value = false;
+  isOpen.value = false;
+};
+
+const goToLogin = () => {
+  router.push('/login');
   isOpen.value = false;
 };
 
@@ -164,6 +169,17 @@ onUnmounted(() => {
         </button>
 
         <button
+            @click="goToLogin"
+            v-motion
+            :hovered="{ scale: 1.1 }"
+            :active="{ scale: 0.9 }"
+            class="hidden sm:flex p-2.5 rounded-full bg-blue-600 text-white border border-blue-500 shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all items-center justify-center"
+            title="Admin Access"
+        >
+          <LogIn class="w-5 h-5" />
+        </button>
+
+        <button
             @click="isOpen = !isOpen"
             v-motion
             :active="{ scale: 0.9 }"
@@ -196,6 +212,14 @@ onUnmounted(() => {
           >
             {{ t(`nav.${item.key}`) }}
           </a>
+
+          <button
+              @click="goToLogin"
+              class="flex items-center justify-center gap-3 px-4 py-4 mt-2 font-black uppercase tracking-widest text-[11px] bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-500/20"
+          >
+            <LogIn class="w-4 h-4" />
+            Admin Access
+          </button>
 
           <div class="mt-4 pt-4 border-t border-slate-200 dark:border-white/10">
             <p class="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-4 px-2">

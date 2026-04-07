@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 const socialLinks = [
-  { icon: Github, href: 'https://github.com/zidqy', label: 'GitHub' },
+  { icon: Github, href: 'https://github.com/BizrStillLearning/', label: 'GitHub' },
   { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
   { icon: Instagram, href: 'https://www.instagram.com/bizrrr_ae/', label: 'Instagram' },
   { icon: Mail, href: 'mailto:abidzardzakwan36@gmail.com', label: 'Email' },
