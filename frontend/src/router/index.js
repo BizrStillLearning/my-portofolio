@@ -1,19 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { auth } from '../firebase'
-import { onAuthStateChanged } from 'firebase/auth'
-
-const getCurrentUser = () => {
-    return new Promise((resolve, reject) => {
-        const removeListener = onAuthStateChanged(
-            auth,
-            (user) => {
-                removeListener();
-                resolve(user);
-            },
-            reject
-        );
-    });
-};
+import { supabase } from '../supabase' // Ganti import firebase menjadi supabase
 
 const routes = [
     { path: '/login', name: 'Login', component: () => import('../views/Login.vue') },
@@ -34,17 +20,21 @@ const router = createRouter({
     routes
 })
 
+// Navigation Guard
 router.beforeEach(async (to, from, next) => {
-    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-    const user = await getCurrentUser();
+    // Mengambil session user saat ini dari Supabase
+    const { data: { session } } = await supabase.auth.getSession()
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
 
-    if (requiresAuth && !user) {
-        next('/login');
-    } else if (to.name === 'Login' && user) {
-        next('/admin-dashboard');
+    if (requiresAuth && !session) {
+        // Jika butuh login tapi tidak ada sesi, arahkan ke login
+        next('/login')
+    } else if (to.name === 'Login' && session) {
+        // Jika sudah login tapi mencoba akses halaman login, lempar ke dashboard
+        next('/admin-dashboard')
     } else {
-        next();
+        next()
     }
-});
+})
 
 export default router

@@ -1,13 +1,13 @@
 <script setup>
-import { ref } from 'vue';
-import { db, auth, storage } from '../firebase';
-import { collection, addDoc } from "firebase/firestore";
-import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { signOut } from 'firebase/auth';
+import { ref, onMounted } from 'vue';
+import { supabase } from '../supabase';
 import { useRouter } from 'vue-router';
-import { Trophy, Upload, X, LogOut, CheckCircle, FileText } from 'lucide-vue-next';
+import {
+  Trophy, Upload, X, LogOut, CheckCircle, FileText, User
+} from 'lucide-vue-next';
 
 const router = useRouter();
+const adminUser = ref(null);
 
 const newCert = ref({
   title: '',
@@ -21,11 +21,17 @@ const imagePreview = ref(null);
 const isPdf = ref(false);
 const isSaving = ref(false);
 
+onMounted(async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    adminUser.value = user;
+  }
+});
+
 const onFileChange = (e) => {
   const file = e.target.files[0];
   if (file) {
     imageFile.value = file;
-
     if (file.type === 'application/pdf') {
       isPdf.value = true;
       imagePreview.value = null;
@@ -50,21 +56,29 @@ const saveCertificate = async () => {
   isSaving.value = true;
   try {
     const fileName = `${Date.now()}_${imageFile.value.name}`;
-    const fileRef = storageRef(storage, `certificates/${fileName}`);
 
-    await uploadBytes(fileRef, imageFile.value);
+    const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('certificates')
+        .upload(fileName, imageFile.value);
 
-    const downloadURL = await getDownloadURL(fileRef);
+    if (uploadError) throw uploadError;
 
-    await addDoc(collection(db, "certificates"), {
-      ...newCert.value,
-      image: downloadURL,
-      fileType: isPdf.value ? 'pdf' : 'image',
-      createdAt: new Date()
-    });
+    const { data: { publicUrl } } = supabase.storage
+        .from('certificates')
+        .getPublicUrl(fileName);
+
+    const { error: dbError } = await supabase
+        .from('certificates')
+        .insert([{
+          ...newCert.value,
+          image: publicUrl,
+          fileType: isPdf.value ? 'pdf' : 'image',
+          created_at: new Date()
+        }]);
+
+    if (dbError) throw dbError;
 
     alert("Sertifikat Berhasil Diupload!");
-
     newCert.value = { title: '', issuer: '', date: '', link: '' };
     removeImage();
   } catch (error) {
@@ -76,8 +90,10 @@ const saveCertificate = async () => {
 };
 
 const handleLogout = async () => {
-  await signOut(auth);
-  router.push('/login');
+  const { error } = await supabase.auth.signOut();
+  if (!error) {
+    router.push('/login');
+  }
 };
 </script>
 
@@ -90,7 +106,14 @@ const handleLogout = async () => {
           <h1 class="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
             Control <span class="text-blue-600">Panel</span>
           </h1>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Manage your certificates & achievements</p>
+          <div v-if="adminUser" class="flex items-center gap-2 mt-2">
+            <div class="p-1 bg-green-500/10 rounded-md">
+              <User class="w-3 h-3 text-green-500" />
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+              Logged in as: <span class="text-slate-600 dark:text-slate-200">{{ adminUser.email }}</span>
+            </p>
+          </div>
         </div>
         <button @click="handleLogout" class="group flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-red-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm">
           <LogOut class="w-4 h-4 transition-transform group-hover:translate-x-1" /> Logout
@@ -131,7 +154,7 @@ const handleLogout = async () => {
 
             <button @click="saveCertificate" :disabled="isSaving" class="mt-10 w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all shadow-xl shadow-blue-500/25 flex items-center justify-center gap-3">
               <span v-if="!isSaving" class="flex items-center gap-2">Publish Certificate <CheckCircle class="w-4 h-4" /></span>
-              <span v-else class="flex items-center gap-2 animate-pulse text-blue-100">Uploading to Cloud...</span>
+              <span v-else class="flex items-center gap-2 animate-pulse text-blue-100">Uploading to Supabase...</span>
             </button>
           </div>
         </div>
@@ -141,10 +164,7 @@ const handleLogout = async () => {
             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 block text-center">Certificate File</label>
 
             <div v-if="!imageFile" class="relative group flex-1 min-h-[250px]">
-              <input type="file"
-                     @change="onFileChange"
-                     accept="image/*,application/pdf"
-                     class="absolute inset-0 w-full h-full opacity-0 z-50 cursor-pointer" />
+              <input type="file" @change="onFileChange" accept="image/*,application/pdf" class="absolute inset-0 w-full h-full opacity-0 z-50 cursor-pointer" />
               <div class="h-full border-2 border-dashed border-slate-200 dark:border-white/10 rounded-[2rem] flex flex-col items-center justify-center p-6 transition-all group-hover:border-blue-600 group-hover:bg-blue-50/50 dark:group-hover:bg-blue-600/5">
                 <div class="p-4 bg-slate-100 dark:bg-white/5 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Upload class="w-8 h-8 text-slate-400 group-hover:text-blue-600" />
@@ -155,9 +175,7 @@ const handleLogout = async () => {
             </div>
 
             <div v-else class="relative flex-1 min-h-[250px] rounded-[2rem] overflow-hidden group bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-
               <img v-if="!isPdf" :src="imagePreview" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-
               <div v-else class="flex flex-col items-center p-6 text-center">
                 <div class="p-5 bg-red-500/10 rounded-2xl mb-4">
                   <FileText class="w-16 h-16 text-red-500" />
@@ -165,7 +183,6 @@ const handleLogout = async () => {
                 <p class="text-xs font-black text-slate-700 dark:text-slate-200 uppercase truncate max-w-[150px]">{{ imageFile.name }}</p>
                 <p class="text-[10px] font-bold text-red-500 uppercase mt-1">PDF Document</p>
               </div>
-
               <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
                 <button @click="removeImage" class="p-4 bg-red-500 text-white rounded-full hover:scale-110 transition-transform active:scale-95 shadow-xl">
                   <X class="w-6 h-6" />

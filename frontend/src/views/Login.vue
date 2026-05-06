@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
-import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+// Ganti import firebase menjadi supabase
+import { supabase } from '../supabase';
 import { useRouter } from 'vue-router';
 import { useThemeStore } from "../stores/themeStore.js";
 import { LockKeyhole, ArrowLeft, ShieldCheck } from "lucide-vue-next";
@@ -12,7 +12,6 @@ const password = ref('');
 const router = useRouter();
 const errorMsg = ref('');
 const isSubmitting = ref(false);
-const isLoading = ref(true);
 
 const login = async () => {
   if (!email.value || !password.value) {
@@ -24,10 +23,19 @@ const login = async () => {
   errorMsg.value = '';
 
   try {
-    await signInWithEmailAndPassword(auth, email.value, password.value);
+    // Menggunakan metode signInWithPassword milik Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value,
+    });
+
+    if (error) throw error;
+
+    // Jika berhasil, arahkan ke dashboard
     router.push('/admin-dashboard');
   } catch (err) {
-    if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+    // Penanganan error spesifik Supabase
+    if (err.message === 'Invalid login credentials') {
       errorMsg.value = "Email atau Password salah.";
     } else {
       errorMsg.value = "Terjadi kesalahan: " + err.message;
@@ -36,12 +44,11 @@ const login = async () => {
     isSubmitting.value = false;
   }
 };
-
 </script>
 
 <template>
   <div class="min-h-screen flex items-center justify-center relative overflow-hidden p-6 bg-slate-50 dark:bg-[#020617] transition-colors duration-700">
-
+    <!-- Tombol Back -->
     <div class="absolute top-10 left-10 z-20">
       <router-link
           to="/"
@@ -52,9 +59,11 @@ const login = async () => {
       </router-link>
     </div>
 
+    <!-- Dekorasi Background -->
     <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full -translate-x-1/2 -translate-y-1/2"></div>
     <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full translate-x-1/2 translate-y-1/2"></div>
 
+    <!-- Card Login -->
     <div
         v-motion
         :initial="{ opacity: 0, scale: 0.9 }"
@@ -77,7 +86,6 @@ const login = async () => {
           <input
               v-model="email"
               type="email"
-              placeholder=""
               class="w-full px-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600/50 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-600/10 transition-all duration-300"
           />
         </div>
@@ -92,6 +100,7 @@ const login = async () => {
           />
         </div>
 
+        <!-- Error Message -->
         <div v-if="errorMsg"
              v-motion
              :initial="{ opacity: 0, y: -10 }"

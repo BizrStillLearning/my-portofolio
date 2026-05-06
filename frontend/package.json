@@ -9,9 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.105.3",
     "@tailwindcss/vite": "^4.1.18",
     "@vueuse/motion": "^3.0.3",
-    "firebase": "^12.11.0",
+    "firebase": "^12.12.1",
     "lucide-vue-next": "^0.563.0",
     "pinia": "^3.0.4",
     "tailwindcss": "^4.1.18",
