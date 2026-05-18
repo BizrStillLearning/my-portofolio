@@ -4,10 +4,10 @@
     "about": "About",
     "portfolio": "Portfolio",
     "contact": "Contact",
-    "cta": "Hire Me"
+    "cta": "Contact Me"
   },
   "hero": {
-    "hello": "Hi, I'm",
+    "hello": "Hello, I am",
     "roles": ["Full Stack Developer", "Machine Learning Engineer"],
     "desc": "I am an Android, Web, and Machine Learning developer focused on building smart applications with clean code.",
     "projects_btn": "View Projects",
@@ -17,8 +17,8 @@
     "title_part1": "About",
     "title_part2": "Me",
     "subtitle": "Fullstack Developer & JavaScript Specialist",
-    "desc_1": "I am a Fullstack Developer with 2 years of experience in building dynamic and scalable web applications. My primary focus is on the JavaScript ecosystem, from frontend to backend.",
-    "desc_2": "I am passionate about writing efficient code using modern frameworks. To me, JavaScript is not just a language, but a primary tool for turning complex ideas into real digital solutions.",
+    "desc_1": "I am a Fullstack Developer with 2 years of experience in building dynamic and scalable web applications. My primary focus is on the JavaScript ecosystem, spanning from frontend to backend.",
+    "desc_2": "I am highly enthusiastic about writing efficient code using modern frameworks. To me, JavaScript is not just a programming language, but a core tool for turning complex ideas into real digital solutions.",
     "stats": {
       "exp": "2 Years Experience",
       "projects": "20+ Projects Completed"
@@ -30,45 +30,23 @@
     "tabs": {
       "projects": "Projects",
       "certificates": "Certificates",
-      "tech": "Technology"
+      "tech": "Technologies"
     },
     "progress": "Progress",
     "recent_activity": "Recent Activity",
     "details": "Details",
-    "verify": "Verify Certificate",
-    "certificates_list": [
-      { "title": "Basic AI Learning", "issuer": "Dicoding Indonesia", "date": "January 2026", "image": "/img/certs/ai.png", "link": "https://www.dicoding.com/certificates/JMZVVKJJ3ZN9" },
-      { "title": "Starting Programming with Python", "issuer": "Dicoding Indonesia", "date": "March 2026", "image": "/img/certs/python.png", "link": "https://www.dicoding.com/certificates/GRX5W24MYZ0M" },
-      { "title": "Basic Web Programming", "issuer": "Dicoding Indonesia", "date": "March 2026", "image": "/img/certs/web.png", "link": "https://www.dicoding.com/certificates/QLZ992M0MZ5D" },
-      { "title": "Beginner Back-End with Javascript", "issuer": "Dicoding Indonesia", "date": "Feb 2026", "image": "/img/certs/Be-pemula.png", "link": "https://www.dicoding.com/certificates/JLX1VGGMNZ72" },
-      { "title": "Basic Cloud and Gen AI on AWS", "issuer": "Dicoding Indonesia", "date": "Feb 2026", "image": "/img/certs/cloud.png", "link": "https://www.dicoding.com/certificates/MRZMWDD6RPYQ" },
-      { "title": "Introduction to Financial Literacy", "issuer": "Dicoding Indonesia", "date": "Mar 2026", "image": "/img/certs/finacial.png", "link": "https://www.dicoding.com/certificates/RVZK0OY7OZD5" }
-    ]
+    "verify": "Verify Certificate"
   },
-  "projects": {
-    "items": [
-      {
-        "title": "SantriConnect Management System",
-        "desc": "Digital management system for Islamic boarding schools focusing on attendance, grades, and student data.",
-        "timeline": [
-          { "month": "May 2025", "summary": "Finishing Journal & Real-time Attendance features" },
-          { "month": "Dec 2025", "summary": "BE maintenance and attendance feature updates" }
-        ]
-      },
-      {
-        "title": "E-Voting Platform",
-        "desc": "Web-based voting system to simplify election processes.",
-        "timeline": [
-          { "month": "Jan 2025", "summary": "Designing ERD, Flow, and Design Patterns" },
-          { "month": "Feb 2025", "summary": "Frontend refinement and Backend implementation" }
-        ]
-      }
-    ]
+  "skills": {
+    "title_part1": "My",
+    "title_part2": "Skills",
+    "subtitle": "Technologies and tools I use to build smart and scalable applications.",
+    "learning_label": "Currently Researching & Learning:"
   },
   "contact": {
     "title_part1": "Contact",
     "title_part2": "Me",
-    "subtitle": "Have an interesting project or idea? Let's talk and build it together!",
+    "subtitle": "Have an interesting project or idea? Let's discuss and bring it to life!",
     "connect_title": "Let's Connect",
     "connect_desc": "I am always open to discussing new projects, creative opportunities, or collaborations as a Fullstack Developer.",
     "send_btn": "Send Message"

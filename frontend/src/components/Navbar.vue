@@ -1,9 +1,17 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { Menu, X, Code2, Globe, Sun, Moon, ChevronDown, LogIn } from 'lucide-vue-next';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import { useThemeStore } from '../stores/themeStore';
+import {
+  Menu,
+  X,
+  Code2,
+  Sun,
+  Moon,
+  ChevronDown,
+  UserCheck
+} from 'lucide-vue-next';
 
 const themeStore = useThemeStore();
 const { locale, t } = useI18n();
@@ -15,17 +23,31 @@ const isLangOpen = ref(false);
 const activeSection = ref('home');
 
 const scrollY = ref(0);
-const handleScroll = () => { scrollY.value = window.scrollY; };
+const handleScroll = () => {
+  scrollY.value = window.scrollY;
+
+  if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50) {
+    activeSection.value = 'contact';
+  }
+};
 const isScrolled = computed(() => scrollY.value > 20);
 
 const languages = [
-  { code: 'en', label: 'English', flag: '🇺🇸' },
-  { code: 'id', label: 'Indonesia', flag: '🇮🇩' },
-  { code: 'jp', label: '日本語', flag: '🇯🇵' },
-  { code: 'kr', label: '한국어', flag: '🇰🇷' },
-  { code: 'zh', label: '中文', flag: '🇨🇳' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' }
+  { code: 'en', label: 'English', flagCode: 'us' },
+  { code: 'id', label: 'Indonesia', flagCode: 'id' },
+  { code: 'jp', label: '日本語', flagCode: 'jp' },
+  { code: 'kr', label: '한국어', flagCode: 'kr' },
+  { code: 'zh', label: '中文', flagCode: 'cn' },
+  { code: 'es', label: 'Español', flagCode: 'es' },
+  { code: 'ar', label: 'العربية', flagCode: 'sa' }
 ];
+
+// Computed untuk mencari URL gambar bendera aktif saat ini dari Flagcdn
+const currentFlagUrl = computed(() => {
+  const current = languages.find(lang => lang.code === locale.value);
+  const code = current ? current.flagCode : 'us';
+  return `https://flagcdn.com/w40/${code}.png`;
+});
 
 const navItems = [
   { key: 'home', href: '#home' },
@@ -36,9 +58,14 @@ const navItems = [
 
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
-    if (entry.isIntersecting) activeSection.value = entry.target.id;
+    if (entry.isIntersecting) {
+      const isAtBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50;
+      if (!isAtBottom) {
+        activeSection.value = entry.target.id;
+      }
+    }
   });
-}, { threshold: 0.5 });
+}, { threshold: 0.3 });
 
 const changeLang = (newLang) => {
   locale.value = newLang;
@@ -64,6 +91,7 @@ const scrollToSection = (e, href) => {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true });
   themeStore.applyTheme();
+
   navItems.forEach(item => {
     const el = document.querySelector(item.href);
     if (el) observer.observe(el);
@@ -79,7 +107,7 @@ onUnmounted(() => {
 <template>
   <header
       class="fixed left-1/2 -translate-x-1/2 z-[100] w-full px-4 pointer-events-none transition-all duration-500"
-      :style="{ top: isScrolled ? '1.5rem' : '0.rem' }"
+      :style="{ top: isScrolled ? '1.5rem' : '0rem' }"
       v-motion
       :initial="{ y: -100, opacity: 0 }"
       :enter="{ y: 0, opacity: 1, transition: { type: 'spring', stiffness: 200, damping: 25 } }"
@@ -124,17 +152,18 @@ onUnmounted(() => {
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+
         <div class="hidden lg:block relative">
           <button
               @click="isLangOpen = !isLangOpen"
               v-motion
               :hovered="{ scale: 1.05 }"
               :active="{ scale: 0.95 }"
-              class="flex items-center gap-2 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/50 dark:border-white/10 text-slate-700 dark:text-white text-[11px] font-bold rounded-full pl-4 pr-3 py-2"
+              class="flex items-center gap-2 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/50 dark:border-white/10 text-slate-700 dark:text-white text-xs font-black rounded-full pl-3 pr-2.5 py-2 cursor-pointer transition-colors"
           >
-            <Globe class="w-4 h-4 text-blue-500" />
-            <span class="uppercase">{{ locale }}</span>
-            <ChevronDown class="w-3 h-3 transition-transform duration-300" :class="{ 'rotate-180': isLangOpen }" />
+            <img :src="currentFlagUrl" class="w-5 h-3.5 object-cover rounded-sm shadow-sm" alt="current flag" />
+            <span class="uppercase tracking-wider font-bold">{{ locale }}</span>
+            <ChevronDown class="w-3.5 h-3.5 transition-transform duration-300 text-slate-400" :class="{ 'rotate-180': isLangOpen }" />
           </button>
 
           <div
@@ -148,10 +177,10 @@ onUnmounted(() => {
                 v-for="lang in languages"
                 :key="lang.code"
                 @click="changeLang(lang.code)"
-                class="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold transition-colors hover:bg-blue-50 dark:hover:bg-white/5"
+                class="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold transition-colors hover:bg-blue-50 dark:hover:bg-white/5 cursor-pointer"
                 :class="locale === lang.code ? 'text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-white/10' : 'text-slate-600 dark:text-slate-400'"
             >
-              <span>{{ lang.flag }}</span>
+              <img :src="`https://flagcdn.com/w40/${lang.flagCode}.png`" class="w-5 h-3.5 object-cover rounded-sm shadow-sm shrink-0" alt="lang flag" />
               <span>{{ lang.label }}</span>
             </button>
           </div>
@@ -162,7 +191,7 @@ onUnmounted(() => {
             v-motion
             :hovered="{ scale: 1.1, rotate: 15 }"
             :active="{ scale: 0.9 }"
-            class="p-2.5 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200/50 dark:border-white/10 text-slate-600 dark:text-blue-400"
+            class="p-2.5 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200/50 dark:border-white/10 text-slate-600 dark:text-blue-400 cursor-pointer"
         >
           <Sun v-if="themeStore.isDark" class="w-5 h-5" />
           <Moon v-else class="w-5 h-5" />
@@ -173,17 +202,17 @@ onUnmounted(() => {
             v-motion
             :hovered="{ scale: 1.1 }"
             :active="{ scale: 0.9 }"
-            class="hidden sm:flex p-2.5 rounded-full bg-blue-600 text-white border border-blue-500 shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all items-center justify-center"
-            title="Admin Access"
+            class="hidden sm:flex p-2.5 rounded-full bg-blue-600 text-white border border-blue-500 shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all items-center justify-center cursor-pointer"
+            title="Admin Access Control"
         >
-          <LogIn class="w-5 h-5" />
+          <UserCheck class="w-5 h-5" />
         </button>
 
         <button
             @click="isOpen = !isOpen"
             v-motion
             :active="{ scale: 0.9 }"
-            class="md:hidden p-2 text-slate-600 dark:text-white rounded-full"
+            class="md:hidden p-2 text-slate-600 dark:text-white rounded-full cursor-pointer"
         >
           <X v-if="isOpen" class="w-6 h-6" />
           <Menu v-else class="w-6 h-6" />
@@ -215,10 +244,10 @@ onUnmounted(() => {
 
           <button
               @click="goToLogin"
-              class="flex items-center justify-center gap-3 px-4 py-4 mt-2 font-black uppercase tracking-widest text-[11px] bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-500/20"
+              class="flex items-center justify-center gap-3 px-4 py-4 mt-2 font-black uppercase tracking-widest text-[11px] bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-500/20 cursor-pointer"
           >
-            <LogIn class="w-4 h-4" />
-            Admin Access
+            <UserCheck class="w-4 h-4" />
+            Admin Control Hub
           </button>
 
           <div class="mt-4 pt-4 border-t border-slate-200 dark:border-white/10">
@@ -231,14 +260,14 @@ onUnmounted(() => {
                   :key="lang.code"
                   @click="changeLang(lang.code)"
                   :class="[
-                  'flex flex-col items-center gap-1 p-3 rounded-xl transition-all border',
+                  'flex flex-col items-center gap-2 p-3 rounded-xl transition-all border cursor-pointer',
                   locale === lang.code
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg'
                     : 'bg-slate-50 dark:bg-white/5 border-transparent text-slate-600 dark:text-slate-400'
                 ]"
               >
-                <span class="text-lg">{{ lang.flag }}</span>
-                <span class="text-[9px] font-black uppercase">{{ lang.code }}</span>
+                <img :src="`https://flagcdn.com/w40/${lang.flagCode}.png`" class="w-6 h-4 object-cover rounded-sm shadow-sm mb-1" alt="mobile flag" />
+                <span class="text-[9px] font-black uppercase tracking-wider">{{ lang.code }}</span>
               </button>
             </div>
           </div>

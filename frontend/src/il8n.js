@@ -6,13 +6,14 @@ import jp from './locales/jp.json';
 import kr from './locales/kr.json';
 import zh from './locales/zh.json';
 import es from './locales/es.json';
+import ar from './locales/ar.json';
 
 const i18n = createI18n({
     legacy: false,
     locale: localStorage.getItem('user_lang') || 'en',
     fallbackLocale: 'en',
     messages: {
-        en, id, jp, kr, zh, es
+        en, id, jp, kr, zh, es, ar
     }
 });
 

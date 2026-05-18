@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { supabase } from '../supabase';
 import {
   Code2,
   ExternalLink,
@@ -16,64 +17,77 @@ import {
 const { t, tm, rt } = useI18n();
 const activeTab = ref('projects');
 
+// State penyimpanan data dari Supabase
+const certificatesFromDB = ref([]);
+const projectsFromDB = ref([]);
+const isLoadingProjects = ref(false);
+
 const tabs = [
   { id: 'projects', label: 'portfolio.tabs.projects', icon: Code2 },
   { id: 'certificates', label: 'portfolio.tabs.certificates', icon: Trophy },
   { id: 'tech', label: 'portfolio.tabs.tech', icon: Layers },
 ];
 
+// FETCH DATA: Certificates dari Supabase
+const fetchCertificates = async () => {
+  try {
+    const { data, error } = await supabase
+        .from('certificates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    certificatesFromDB.value = data || [];
+  } catch (error) {
+    console.error('Error fetching certificates:', error.message);
+  }
+};
+
+// FETCH DATA: Projects dari Supabase
+const fetchProjects = async () => {
+  try {
+    isLoadingProjects.value = true;
+    const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('id', { ascending: true });
+
+    if (error) throw error;
+    projectsFromDB.value = data || [];
+  } catch (error) {
+    console.error('Error fetching projects:', error.message);
+  } finally {
+    isLoadingProjects.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchCertificates();
+  fetchProjects();
+});
+
+// LOGIK GERAKAN DATA: Projects Terintegrasi Supabase (Mendukung JSONB tags & timeline)
 const projectsData = computed(() => {
-  const rawItems = tm('projects.items');
-  if (!rawItems || typeof rawItems !== 'object') return [];
-
-  const projectMetadata = [
-    {
-      id: 1,
-      image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
-      progress: 85,
-      github: 'https://github.com/zidqy/santriconnect',
-      tags: ['Vue.js', 'Tailwind', 'PHP']
-    },
-    {
-      id: 2,
-      image: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?w=800&q=80',
-      progress: 20,
-      github: 'https://github.com/zidqy/informatics25-platform',
-      tags: ['Vue.js', 'Tailwind', 'Golang']
-    }
-  ];
-
-  const itemsArray = Array.isArray(rawItems) ? rawItems : Object.values(rawItems);
-
-  return itemsArray.map((item, index) => ({
-    ...projectMetadata[index],
-    title: rt(item.title),
-    description: rt(item.desc),
-    timeline: Array.isArray(item.timeline) ? item.timeline.map(e => ({
-      month: rt(e.month),
-      summary: rt(e.summary)
-    })) : []
+  return projectsFromDB.value.map((project) => ({
+    id: project.id,
+    title: project.title,
+    description: project.description,
+    progress: project.progress || 0,
+    github: project.github_url || '#',
+    // Memastikan data jsonb aman dibaca sebagai array di Vue template
+    tags: Array.isArray(project.tags) ? project.tags : [],
+    timeline: Array.isArray(project.timeline) ? project.timeline : []
   }));
 });
 
+// LOGIK GERAKAN DATA: Certificates Terintegrasi Supabase (Gaya Clean Minimalis Tanpa Gambar)
 const certificatesData = computed(() => {
-  const rawCerts = tm('portfolio.certificates_list');
-  if (!rawCerts || typeof rawCerts !== 'object') return [];
-
-  const certsArray = Array.isArray(rawCerts) ? rawCerts : Object.values(rawCerts);
-
-  return certsArray.map((cert) => {
-    let imagePath = rt(cert.image);
-    if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
-      imagePath = '/' + imagePath;
-    }
-
+  return certificatesFromDB.value.map((cert) => {
     return {
-      title: rt(cert.title),
-      issuer: rt(cert.issuer),
-      date: rt(cert.date),
-      image: imagePath || 'https://via.placeholder.com/600x400?text=Certificate+Preview',
-      link: rt(cert.link) || '#'
+      title: cert.title,
+      issuer: cert.issuer,
+      date: cert.date,
+      link: cert.link || '#'
     };
   });
 });
@@ -100,6 +114,7 @@ const setTab = (id) => {
   <section id="portfolio" class="py-24 relative overflow-hidden bg-white dark:bg-[#020617] transition-colors duration-700">
     <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center"></div>
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+
       <div v-motion :initial="{ opacity: 0, y: 30 }" :visible-once="{ opacity: 1, y: 0 }" class="text-center mb-16">
         <h2 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight">
           {{ t('portfolio.title_part1') }} <span class="text-gradient font-black">{{ t('portfolio.title_part2') }}</span>
@@ -120,49 +135,57 @@ const setTab = (id) => {
         </div>
       </div>
 
-      <div v-if="activeTab === 'projects'" class="grid md:grid-cols-2 gap-8">
-        <div
-            v-for="(project, index) in projectsData"
-            :key="index"
-            v-motion
-            :initial="{ opacity: 0, scale: 0.95 }"
-            :enter="{ opacity: 1, scale: 1, transition: { delay: index * 100 } }"
-            class="group bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
-        >
-          <div class="relative h-64 overflow-hidden">
-            <img :src="project.image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
-            <div class="absolute bottom-6 left-8 flex flex-wrap gap-2">
-              <span v-for="tag in project.tags" :key="tag" class="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-[9px] font-black text-white uppercase tracking-widest">{{ tag }}</span>
-            </div>
-          </div>
+      <div v-if="activeTab === 'projects'" class="space-y-6">
+        <div v-if="isLoadingProjects" class="py-20 text-center">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Syncing Projects Grid...</p>
+        </div>
 
-          <div class="p-8">
-            <div class="flex justify-between items-start mb-6">
-              <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ project.title }}</h3>
-              <div class="text-right">
-                <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest block mb-1">{{ t('portfolio.progress') }}</span>
-                <p class="text-xl font-black text-slate-900 dark:text-white">{{ project.progress }}%</p>
+        <div v-else-if="projectsData.length === 0" class="py-20 text-center text-slate-400 text-xs font-medium uppercase tracking-wider">
+          Belum ada project terpublikasi di database.
+        </div>
+
+        <div v-else class="grid md:grid-cols-2 gap-8">
+          <div
+              v-for="(project, index) in projectsData"
+              :key="project.id"
+              v-motion
+              :initial="{ opacity: 0, scale: 0.95 }"
+              :enter="{ opacity: 1, scale: 1, transition: { delay: index * 100 } }"
+              class="group bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 flex flex-col justify-between"
+          >
+            <div class="p-8 pb-4">
+              <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ project.title }}</h3>
+                <div class="text-right shrink-0">
+                  <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest block mb-1">{{ t('portfolio.progress') }}</span>
+                  <p class="text-xl font-black text-slate-900 dark:text-white">{{ project.progress }}%</p>
+                </div>
               </div>
-            </div>
 
-            <div class="mb-8 p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/5">
-              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Clock3 class="w-3 h-3" /> {{ t('portfolio.recent_activity') }}
-              </p>
-              <div class="space-y-4">
-                <div v-for="(log, lIdx) in project.timeline.slice(-2)" :key="lIdx" class="flex gap-3 items-start group/log">
-                  <GitCommitVertical class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p class="text-[10px] font-black text-slate-900 dark:text-white uppercase">{{ log.month }}</p>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{{ log.summary }}</p>
+              <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 font-medium">{{ project.description }}</p>
+
+              <div class="flex flex-wrap gap-1.5 mb-6">
+                <span v-for="tag in project.tags" :key="tag" class="px-2.5 py-1 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/5 rounded-lg text-[9px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">{{ tag }}</span>
+              </div>
+
+              <div v-if="project.timeline.length > 0" class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/5">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Clock3 class="w-3 h-3" /> {{ t('portfolio.recent_activity') }}
+                </p>
+                <div class="space-y-4">
+                  <div v-for="(log, lIdx) in project.timeline.slice(-2)" :key="lIdx" class="flex gap-3 items-start group/log">
+                    <GitCommitVertical class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p class="text-[10px] font-black text-slate-900 dark:text-white uppercase leading-none mb-1">{{ log.month }}</p>
+                      <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{{ log.summary }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="flex gap-4 pt-4 border-t border-slate-200 dark:border-white/5">
-              <a :href="project.github" target="_blank" class="flex items-center gap-2 text-xs font-black uppercase text-slate-500 hover:text-blue-600 transition-colors group/link">
+            <div class="px-8 pb-8 pt-4 border-t border-slate-200 dark:border-white/5 flex gap-4 items-center">
+              <a v-if="project.github && project.github !== '#'" :href="project.github" target="_blank" class="flex items-center gap-2 text-xs font-black uppercase text-slate-500 hover:text-blue-600 transition-colors group/link">
                 <Github class="w-4 h-4 transition-transform group-hover/link:rotate-12" /> Github
               </a>
               <a href="#" class="flex items-center gap-2 text-xs font-black uppercase text-slate-500 hover:text-blue-600 transition-colors group/link ml-auto">
@@ -174,7 +197,12 @@ const setTab = (id) => {
       </div>
 
       <div v-if="activeTab === 'certificates'" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+        <div v-if="certificatesFromDB.length === 0" class="col-span-full py-20 text-center">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Fetching Credentials...</p>
+        </div>
+
         <div
+            v-else
             v-for="(cert, cIdx) in certificatesData"
             :key="cIdx"
             v-motion
@@ -182,30 +210,22 @@ const setTab = (id) => {
             :enter="{ opacity: 1, y: 0, transition: { delay: cIdx * 100 } }"
             class="group bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-200 dark:border-white/5 overflow-hidden transition-all duration-500 hover:shadow-2xl h-full flex flex-col"
         >
-          <div class="relative h-44 overflow-hidden border-b border-slate-200 dark:border-white/5 shrink-0">
-            <img
-                :src="cert.image"
-                class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-700"
-                @error="(e) => e.target.src = 'https://via.placeholder.com/600x400?text=Error+Loading'"
-                loading="lazy"
-            />
-            <div class="absolute inset-0 bg-blue-600/10 group-hover:bg-transparent transition-colors"></div>
+          <div class="relative h-24 bg-gradient-to-br from-blue-600/10 to-purple-600/10 flex items-center justify-center border-b border-slate-200 dark:border-white/5 shrink-0">
+            <div class="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm group-hover:scale-110 transition-transform duration-500">
+              <Trophy class="w-8 h-8 text-blue-600" />
+            </div>
+            <div class="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </div>
 
           <div class="p-6 flex-1 flex flex-col justify-between">
-
             <div class="block">
               <div class="flex items-start gap-2 mb-3">
                 <ShieldCheck class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase leading-tight line-clamp-2">
-                  {{ cert.title }}
-                </h3>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase leading-tight line-clamp-2">{{ cert.title }}</h3>
               </div>
 
               <div class="flex flex-col gap-1 mb-6">
-                <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest italic">
-                  {{ cert.issuer }}
-                </p>
+                <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest italic">{{ cert.issuer }}</p>
                 <div class="flex items-center gap-1.5 text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase">
                   <Clock3 class="w-3 h-3" />
                   <span>{{ cert.date }}</span>

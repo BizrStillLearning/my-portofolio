@@ -4,7 +4,7 @@
     "about": "Sobre mí",
     "portfolio": "Portafolio",
     "contact": "Contacto",
-    "cta": "Contrátame"
+    "cta": "Contáctame"
   },
   "hero": {
     "hello": "Hola, soy",
@@ -17,8 +17,8 @@
     "title_part1": "Sobre",
     "title_part2": "Mí",
     "subtitle": "Desarrollador Fullstack y Especialista en JavaScript",
-    "desc_1": "Soy un Desarrollador Fullstack dengan 2 años de experiencia construyendo aplicaciones web dinámicas y escalables. Mi enfoque principal está en el ecosistema JavaScript, desde el frontend hasta el backend.",
-    "desc_2": "Me apasiona escribir código eficiente utilizando frameworks modernos. Para mí, JavaScript no es solo un lenguaje, sino una herramienta principal para transformar ideas complejas en soluciones digitales reales.",
+    "desc_1": "Soy un Desarrollador Fullstack con 2 años de experiencia en la creación de aplicaciones web dinámicas y escalables. Mi enfoque principal está en el ecosistema de JavaScript, abarcando desde el frontend hasta el backend.",
+    "desc_2": "Me entusiasma mucho escribir código eficiente utilizando frameworks modernos. Para mí, JavaScript no es solo un lenguaje de programación, sino una herramienta fundamental para transformar ideas complejas en soluciones digitales reales.",
     "stats": {
       "exp": "2 Años de Experiencia",
       "projects": "20+ Proyectos Completados"
@@ -27,25 +27,24 @@
   "portfolio": {
     "title_part1": "Mi",
     "title_part2": "Portafolio",
-    "tabs": { "projects": "Proyectos", "certificates": "Certificados", "tech": "Tecnología" },
-    "verify": "Verificar Certificado",
-    "certificates_list": [
-      { "title": "Aprendizaje de IA Básica", "issuer": "Dicoding Indonesia", "date": "Enero 2026", "image": "/img/certs/ai.png", "link": "https://www.dicoding.com/certificates/JMZVVKJJ3ZN9" }
-    ]
+    "tabs": {
+      "projects": "Proyectos",
+      "certificates": "Certificados",
+      "tech": "Tecnología"
+    },
+    "progress": "Progreso",
+    "recent_activity": "Actividad Reciente",
+    "details": "Detalles",
+    "verify": "Verificar Certificado"
   },
-  "projects": {
-    "items": [
-      {
-        "title": "SantriConnect Management System",
-        "desc": "Sistema de gestión digital para escuelas internados islámicas centrado en asistencia, calificaciones y datos de estudiantes.",
-        "timeline": [
-          { "month": "Mayo 2025", "summary": "Finalización de funciones de Diario y Asistencia en tiempo real" }
-        ]
-      }
-    ]
+  "skills": {
+    "title_part1": "Mis",
+    "title_part2": "Habilidades",
+    "subtitle": "Tecnologías y herramientas que utilizo para construir aplicaciones inteligentes y escalables.",
+    "learning_label": "Investigando y Aprendiendo Actualmente:"
   },
   "contact": {
-    "title_part1": "Contacta",
+    "title_part1": "Contactar",
     "title_part2": "Conmigo",
     "subtitle": "¿Tienes un proyecto o idea interesante? ¡Hablemos y hagámoslo realidad!",
     "connect_title": "Conectemos",

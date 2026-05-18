@@ -1,56 +1,54 @@
 {
   "nav": {
     "home": "ホーム",
-    "about": "私について",
+    "about": "自己紹介",
     "portfolio": "ポートフォリオ",
     "contact": "お問い合わせ",
-    "cta": "お問い合わせ"
+    "cta": "連絡する"
   },
   "hero": {
     "hello": "こんにちは、私は",
     "roles": ["フルスタック開発者", "機械学習エンジニア"],
-    "desc": "Android、Web、機械学習の開発者として、クリーンなコードでスマートなアプリケーションを構築することに注力しています。",
+    "desc": "クリーンなコードでスマートなアプリケーションを構築することに注力している、Android、Web、および機械学習の開発者です。",
     "projects_btn": "プロジェクトを見る",
-    "cv_btn": "履歴書をダウンロード"
+    "cv_btn": "CVをダウンロード"
   },
   "about": {
     "title_part1": "私に",
     "title_part2": "ついて",
-    "subtitle": "フルスタック開発者 & JavaScript スペシャリスト",
-    "desc_1": "動的でスケーラブルなウェブアプリケーションの構築において2年の経験を持つフルスタック開発者です。フロントエンドからバックエンドまで、JavaScriptのエコシステムを専門としています。",
-    "desc_2": "最新のフレームワークを使用して効率的なコードを書くことに情熱を持っています。私にとってJavaScriptは単なる言語ではなく、複雑なアイデアをデジタルの現実に変えるための主要なツールです。",
+    "subtitle": "フルスタック開発者＆JavaScriptスペシャリスト",
+    "desc_1": "私は動的でスケーラブルなWebアプリケーションの構築において2年の経験を持つフルスタック開発者です。主な専門は、フロントエンドからバックエンドに及ぶJavaScriptのエコシステムです。",
+    "desc_2": "モダンなフレームワークを使用して効率的なコードを書くことに非常に熱心です。私にとってJavaScriptは単なるプログラミング言語ではなく、複雑なアイデアを具体的なデジタルソリューションに変えるためのコアツールです。",
     "stats": {
       "exp": "2年の経験",
-      "projects": "20以上の完了プロジェクト"
+      "projects": "20以上のプロジェクト完了"
     }
   },
   "portfolio": {
-    "title_part1": "私の",
+    "title_part1": "マイ",
     "title_part2": "ポートフォリオ",
-    "tabs": { "projects": "プロジェクト", "certificates": "証明書", "tech": "技術" },
-    "verify": "証明書を確認",
-    "certificates_list": [
-      { "title": "AI基礎学習", "issuer": "Dicoding Indonesia", "date": "2026年1月", "image": "/img/certs/ai.png", "link": "https://www.dicoding.com/certificates/JMZVVKJJ3ZN9" },
-      { "title": "Pythonプログラミング入門", "issuer": "Dicoding Indonesia", "date": "2026年3月", "image": "/img/certs/python.png", "link": "https://www.dicoding.com/certificates/GRX5W24MYZ0M" }
-    ]
+    "tabs": {
+      "projects": "プロジェクト",
+      "certificates": "証明書",
+      "tech": "技術スタック"
+    },
+    "progress": "進捗状況",
+    "recent_activity": "最近の活動",
+    "details": "詳細",
+    "verify": "証明書を検証"
   },
-  "projects": {
-    "items": [
-      {
-        "title": "SantriConnect 管理システム",
-        "desc": "出席管理、成績、生徒データを中心としたイスラム寄宿学校向けデジタル管理システム。",
-        "timeline": [
-          { "month": "2025年5月", "summary": "ジャーナルとリアルタイム出席機能の完成" }
-        ]
-      }
-    ]
+  "skills": {
+    "title_part1": "私の",
+    "title_part2": "スキル",
+    "subtitle": "スマートでスケーラブルなアプリケーションを構築するために使用しているテクノロジーとツール。",
+    "learning_label": "現在研究・学習中の技術:"
   },
   "contact": {
     "title_part1": "お問い",
     "title_part2": "合わせ",
-    "subtitle": "面白いプロジェクトやアイデアがありますか？一緒に実現しましょう！",
-    "connect_title": "つながりましょう",
-    "connect_desc": "新しいプロジェクトやクリエイティブな機会、フルスタック開発者としてのコラボレーションについて、いつでもお話ししましょう。",
-    "send_btn": "メッセージ送信"
+    "subtitle": "面白いプロジェクトやアイデアをお持ちですか？一緒に話し合って形にしましょう！",
+    "connect_title": "つながる",
+    "connect_desc": "フルスタック開発者として、新しいプロジェクト、クリエイティブな機会、またはコラボレーションについての話し合いをいつでも歓迎します。",
+    "send_btn": "メッセージを送信"
   }
 }

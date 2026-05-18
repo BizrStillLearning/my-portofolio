@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const isSuccess = ref(false);
 const isError = ref(false);
+const isSubmitting = ref(false);
 
 const formData = reactive({
   name: '',
@@ -16,29 +17,48 @@ const formData = reactive({
 const personalInfo = {
   whatsapp: '6289601261250',
   email: 'abidzardzakwan36@gmail.com',
-  location: 'Surabaya, Indonesia'
+  location: 'Surabaya, Indonesia',
+  formspreeEndpoint: 'https://formspree.io/f/mvzyooaz'
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!formData.name || !formData.email || !formData.message) {
     isError.value = true;
     setTimeout(() => isError.value = false, 3000);
     return;
   }
 
-  const waMessage = encodeURIComponent(
-      `Halo Abidzar, saya ${formData.name} (${formData.email}).\n\n${formData.message}`
-  );
+  try {
+    isSubmitting.value = true;
 
-  isSuccess.value = true;
+    const response = await fetch(personalInfo.formspreeEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message
+      })
+    });
 
-  setTimeout(() => {
-    window.open(`https://wa.me/${personalInfo.whatsapp}?text=${waMessage}`, '_blank');
-    formData.name = '';
-    formData.email = '';
-    formData.message = '';
-    isSuccess.value = false;
-  }, 1000);
+    if (response.ok) {
+      isSuccess.value = true;
+      formData.name = '';
+      formData.email = '';
+      formData.message = '';
+      setTimeout(() => isSuccess.value = false, 4000);
+    } else {
+      throw new Error('Gagal mengirim pesan.');
+    }
+  } catch (error) {
+    isError.value = true;
+    setTimeout(() => isError.value = false, 3000);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const contactInfo = [
@@ -60,7 +80,7 @@ const contactInfo = [
     icon: MapPin,
     title: 'Location',
     value: personalInfo.location,
-    link: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126646.20966144577!2d112.6302820556247!3d-7.275971708893791!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7fbf8381843b9%3A0x4027a763a1056a0!2sSurabaya%2C%20Jawa%20Timur!5e0!3m2!1sid!2sid!4v1711410000000!5m2!1sid!2sid',
+    link: 'https://maps.app.goo.gl/cGndtoXEozdYEnBK6',
     color: 'text-rose-500'
   },
 ];
@@ -99,7 +119,7 @@ const contactInfo = [
 
             <div class="space-y-4">
               <a
-                  v-for="(info, index) in contactInfo"
+                  v-for="info in contactInfo"
                   :key="info.title"
                   :href="info.link"
                   target="_blank"
@@ -125,13 +145,12 @@ const contactInfo = [
               class="rounded-[3rem] overflow-hidden border-8 border-white dark:border-slate-800 h-72 shadow-2xl relative group bg-slate-200 dark:bg-slate-900"
           >
             <iframe
-                :src="contactInfo[2].link"
-                width="100%"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d253255.4534571994!2d112.57324317135043!3d-7.284362145325143!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7fbf8381ac213%3A0x3027a76e352be40!2sSurabaya%2C%20Jawa%20Timur!5e0!3m2!1sid!2sid!4v1715972800000!5m2!1sid!2sid"                width="100%"
                 height="100%"
                 style="border:0;"
                 allowfullscreen=""
                 loading="lazy"
-                class="w-full h-full"
+                class="w-full h-full grayscale-[20%] dark:grayscale-[60%] dark:invert-[90%] dark:hue-rotate-180 transition-all duration-700"
             ></iframe>
           </div>
         </div>
@@ -150,6 +169,7 @@ const contactInfo = [
                     v-model="formData.name"
                     type="text"
                     required
+                    :disabled="isSubmitting"
                     class="w-full px-7 py-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-900 dark:text-white font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600"
                     placeholder="Abidzar..."
                 />
@@ -160,6 +180,7 @@ const contactInfo = [
                     v-model="formData.email"
                     type="email"
                     required
+                    :disabled="isSubmitting"
                     class="w-full px-7 py-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-900 dark:text-white font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600"
                     placeholder="your@email.com"
                 />
@@ -172,6 +193,7 @@ const contactInfo = [
                   v-model="formData.message"
                   required
                   rows="4"
+                  :disabled="isSubmitting"
                   class="w-full px-7 py-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-900 dark:text-white font-bold resize-none placeholder:text-slate-300 dark:placeholder:text-slate-600"
                   placeholder="Tell me about your project..."
               ></textarea>
@@ -180,24 +202,25 @@ const contactInfo = [
             <div class="h-6">
               <transition name="fade">
                 <div v-if="isError" class="flex items-center gap-2 text-rose-500 text-xs font-black px-2">
-                  <AlertCircle class="w-4 h-4" /> {{ t('contact.error_msg') || 'Fill all fields!' }}
+                  <AlertCircle class="w-4 h-4" /> {{ t('contact.error_msg') || 'Something went wrong!' }}
                 </div>
                 <div v-else-if="isSuccess" class="flex items-center gap-2 text-emerald-500 text-xs font-black px-2">
-                  <CheckCircle2 class="w-4 h-4" /> {{ t('contact.success_msg') || 'Opening WhatsApp...' }}
+                  <CheckCircle2 class="w-4 h-4" /> {{ t('contact.success_msg') || 'Message sent successfully!' }}
                 </div>
               </transition>
             </div>
 
             <button
                 type="submit"
-                :disabled="isSuccess"
+                :disabled="isSubmitting || isSuccess"
                 v-motion
                 :hovered="{ scale: 1.02 }"
                 :active="{ scale: 0.98 }"
                 class="w-full flex items-center justify-center gap-3 px-8 py-6 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-blue-700 hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
             >
-              <Send class="w-4 h-4" />
-              {{ t('contact.send_btn') }}
+              <Send class="w-4 h-4 animate-bounce" v-if="isSubmitting" />
+              <Send class="w-4 h-4" v-else />
+              {{ isSubmitting ? 'Sending...' : t('contact.send_btn') }}
             </button>
           </form>
         </div>

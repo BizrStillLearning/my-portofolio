@@ -124,14 +124,14 @@ const profileData = {
           >
             <a
                 href="#projects"
-                class="w-full sm:w-auto px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/40 transition-all active:scale-95 flex items-center justify-center gap-2 group"
+                class="w-full sm:w-auto px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/40 transition-all active:scale-95 flex items-center justify-center gap-2 group cursor-pointer"
             >
               {{ t('hero.projects_btn') }}
               <ChevronRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
             <a
                 href="/cv.pdf"
-                class="w-full sm:w-auto px-10 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:border-blue-500/50 transition-all active:scale-95 flex items-center justify-center gap-2"
+                class="w-full sm:w-auto px-10 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:border-blue-500/50 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               {{ t('hero.cv_btn') }}
               <Download class="w-4 h-4" />

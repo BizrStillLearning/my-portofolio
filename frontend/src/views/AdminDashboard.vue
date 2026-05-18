@@ -1,197 +1,432 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { supabase } from '../supabase';
-import { useRouter } from 'vue-router';
+import { supabase } from '../supabase'; // Pastikan path ke file supabase.js sudah benar
 import {
-  Trophy, Upload, X, LogOut, CheckCircle, FileText, User
+  LayoutDashboard,
+  Trophy,
+  Code2,
+  Plus,
+  Pencil,
+  Trash2,
+  LogOut,
+  Save,
+  Loader2
 } from 'lucide-vue-next';
 
-const router = useRouter();
-const adminUser = ref(null);
+// State Navigasi
+const activeMenu = ref('home');
 
-const newCert = ref({
+// State Global & Loading
+const isLoading = ref(false);
+
+// Teks Statis Admin
+const adminName = "Abidzar Dzakwan Sahudi";
+
+// State Data dari Supabase
+const certificates = ref([]);
+const projects = ref([]);
+
+// State Form Certificates
+const certForm = ref({ id: null, title: '', issuer: '', date: '', link: '' });
+const isEditingCert = ref(false);
+
+// State Form Projects
+const projectForm = ref({
+  id: null,
   title: '',
-  issuer: '',
-  date: '',
-  link: ''
+  description: '',
+  progress: 0,
+  github_url: '',
+  tagsInput: '',
+  timelineInput: ''
 });
+const isEditingProject = ref(false);
 
-const imageFile = ref(null);
-const imagePreview = ref(null);
-const isPdf = ref(false);
-const isSaving = ref(false);
-
-onMounted(async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    adminUser.value = user;
-  }
-});
-
-const onFileChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    imageFile.value = file;
-    if (file.type === 'application/pdf') {
-      isPdf.value = true;
-      imagePreview.value = null;
-    } else {
-      isPdf.value = false;
-      imagePreview.value = URL.createObjectURL(file);
-    }
-  }
-};
-
-const removeImage = () => {
-  imageFile.value = null;
-  imagePreview.value = null;
-  isPdf.value = false;
-};
-
-const saveCertificate = async () => {
-  if (!newCert.value.title || !imageFile.value) {
-    return alert("Judul dan File wajib diisi!");
-  }
-
-  isSaving.value = true;
+// Fetch Data Awal Dinamis (Supabase Only)
+const fetchData = async () => {
   try {
-    const fileName = `${Date.now()}_${imageFile.value.name}`;
+    isLoading.value = true;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('certificates')
-        .upload(fileName, imageFile.value);
+    // Fetch Certificates
+    const { data: certs } = await supabase.from('certificates').select('*').order('created_at', { ascending: false });
+    certificates.value = certs || [];
 
-    if (uploadError) throw uploadError;
+    // Fetch Projects
+    const { data: projs } = await supabase.from('projects').select('*').order('id', { ascending: true });
+    projects.value = projs || [];
 
-    const { data: { publicUrl } } = supabase.storage
-        .from('certificates')
-        .getPublicUrl(fileName);
-
-    const { error: dbError } = await supabase
-        .from('certificates')
-        .insert([{
-          ...newCert.value,
-          image: publicUrl,
-          fileType: isPdf.value ? 'pdf' : 'image',
-          created_at: new Date()
-        }]);
-
-    if (dbError) throw dbError;
-
-    alert("Sertifikat Berhasil Diupload!");
-    newCert.value = { title: '', issuer: '', date: '', link: '' };
-    removeImage();
-  } catch (error) {
-    console.error("Gagal simpan:", error);
-    alert("Error: " + error.message);
+  } catch (err) {
+    console.error('Gagal mengambil data:', err.message);
   } finally {
-    isSaving.value = false;
+    isLoading.value = false;
   }
 };
 
+onMounted(() => {
+  fetchData();
+});
+
+// ==========================================
+// LOGIK GERAKAN DATA: LOGOUT
+// ==========================================
 const handleLogout = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (!error) {
-    router.push('/login');
+  if (!confirm('Apakah Anda yakin ingin keluar dari Dashboard Admin?')) return;
+  try {
+    isLoading.value = true;
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+
+    alert('Berhasil logout!');
+    window.location.href = '/';
+  } catch (err) {
+    alert('Gagal logout: ' + err.message);
+  } finally {
+    isLoading.value = false;
   }
+};
+
+// ==========================================
+// LOGIK GERAKAN DATA: CERTIFICATES
+// ==========================================
+const handleCertSubmit = async () => {
+  try {
+    isLoading.value = true;
+    const payload = {
+      title: certForm.value.title,
+      issuer: certForm.value.issuer,
+      date: certForm.value.date,
+      link: certForm.value.link
+    };
+
+    if (isEditingCert.value) {
+      const { error } = await supabase.from('certificates').update(payload).eq('id', certForm.value.id);
+      if (error) throw error;
+      alert('Sertifikat berhasil diperbarui!');
+    } else {
+      const { error } = await supabase.from('certificates').insert([payload]);
+      if (error) throw error;
+      alert('Sertifikat berhasil ditambahkan!');
+    }
+    resetCertForm();
+    fetchData();
+    activeMenu.value = 'edit-certificates';
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const editCert = (cert) => {
+  isEditingCert.value = true;
+  certForm.value = { ...cert };
+  activeMenu.value = 'upload-certificates';
+};
+
+const deleteCert = async (id) => {
+  if (!confirm('Apakah Anda yakin ingin menghapus sertifikat ini?')) return;
+  try {
+    const { error } = await supabase.from('certificates').delete().eq('id', id);
+    if (error) throw error;
+    fetchData();
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+const resetCertForm = () => {
+  certForm.value = { id: null, title: '', issuer: '', date: '', link: '' };
+  isEditingCert.value = false;
+};
+
+// ==========================================
+// LOGIK GERAKAN DATA: PROJECTS (Sempurna & Valid)
+// ==========================================
+const handleProjectSubmit = async () => {
+  try {
+    isLoading.value = true;
+
+    // 1. Konversi string tags (koma) menjadi Array Javascript murni
+    const tagsArray = projectForm.value.tagsInput
+        ? projectForm.value.tagsInput.split(',').map(t => t.trim()).filter(t => t)
+        : [];
+
+    // 2. Validasi & Parsing data Timeline agar terhindar dari crash JSON parse
+    let timelineObj = [];
+    if (projectForm.value.timelineInput) {
+      try {
+        // Coba baca jika format inputan user adalah JSON Array valid
+        timelineObj = JSON.parse(projectForm.value.timelineInput);
+      } catch (e) {
+        // Fallback: Jika user hanya mengetik teks narasi biasa, bungkus ke object logs default
+        timelineObj = [{ month: "Logs Activity", summary: projectForm.value.timelineInput }];
+      }
+    }
+
+    const payload = {
+      title: projectForm.value.title,
+      description: projectForm.value.description,
+      progress: parseInt(projectForm.value.progress) || 0,
+      github_url: projectForm.value.github_url || null, // Menghindari string kosong di PostgreSQL URL field
+      tags: tagsArray, // Masuk ke kolom JSONB
+      timeline: timelineObj // Masuk ke kolom JSONB
+    };
+
+    if (isEditingProject.value) {
+      const { error } = await supabase.from('projects').update(payload).eq('id', projectForm.value.id);
+      if (error) throw error;
+      alert('Proyek berhasil diperbarui!');
+    } else {
+      const { error } = await supabase.from('projects').insert([payload]);
+      if (error) throw error;
+      alert('Proyek berhasil ditambahkan!');
+    }
+
+    resetProjectForm();
+    await fetchData();
+    activeMenu.value = 'edit-project';
+  } catch (err) {
+    alert('Gagal memproses project: ' + err.message);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const editProject = (proj) => {
+  isEditingProject.value = true;
+  projectForm.value = {
+    id: proj.id,
+    title: proj.title,
+    description: proj.description,
+    progress: proj.progress,
+    github_url: proj.github_url || '',
+    tagsInput: proj.tags ? proj.tags.join(', ') : '',
+    timelineInput: proj.timeline ? JSON.stringify(proj.timeline, null, 2) : '[]'
+  };
+  activeMenu.value = 'upload-project';
+};
+
+const deleteProject = async (id) => {
+  if (!confirm('Apakah Anda yakin ingin menghapus proyek ini secara permanen?')) return;
+  try {
+    const { error } = await supabase.from('projects').delete().eq('id', id);
+    if (error) throw error;
+    fetchData();
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+const resetProjectForm = () => {
+  projectForm.value = { id: null, title: '', description: '', progress: 0, github_url: '', tagsInput: '', timelineInput: '' };
+  isEditingProject.value = false;
 };
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-[#020617] p-4 md:p-8 transition-colors duration-500">
-    <div class="max-w-5xl mx-auto">
+  <div class="flex h-screen bg-slate-100 dark:bg-[#020617] font-sans transition-colors duration-300">
 
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-        <div>
-          <h1 class="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-            Control <span class="text-blue-600">Panel</span>
-          </h1>
-          <div v-if="adminUser" class="flex items-center gap-2 mt-2">
-            <div class="p-1 bg-green-500/10 rounded-md">
-              <User class="w-3 h-3 text-green-500" />
-            </div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-              Logged in as: <span class="text-slate-600 dark:text-slate-200">{{ adminUser.email }}</span>
-            </p>
-          </div>
+    <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-white/5 flex flex-col justify-between shrink-0">
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black">Z</div>
+          <span class="text-sm font-black uppercase text-slate-800 dark:text-white tracking-widest">Admin Hub</span>
         </div>
-        <button @click="handleLogout" class="group flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-red-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm">
-          <LogOut class="w-4 h-4 transition-transform group-hover:translate-x-1" /> Logout
+
+        <nav class="space-y-1">
+          <button @click="activeMenu = 'home'" :class="activeMenu === 'home' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">
+            <LayoutDashboard class="w-4 h-4" /> Home
+          </button>
+
+          <div class="pt-4 pb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Certificates</div>
+          <button @click="activeMenu = 'upload-certificates'; resetCertForm()" :class="activeMenu === 'upload-certificates' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">
+            <Plus class="w-4 h-4" /> Add Certificate
+          </button>
+          <button @click="activeMenu = 'edit-certificates'" :class="activeMenu === 'edit-certificates' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">
+            <Trophy class="w-4 h-4" /> Manage Certs
+          </button>
+
+          <div class="pt-4 pb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Projects</div>
+          <button @click="activeMenu = 'upload-project'; resetProjectForm()" :class="activeMenu === 'upload-project' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">
+            <Plus class="w-4 h-4" /> Add Project
+          </button>
+          <button @click="activeMenu = 'edit-project'" :class="activeMenu === 'edit-project' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">
+            <Code2 class="w-4 h-4" /> Manage Projects
+          </button>
+        </nav>
+      </div>
+
+      <div class="p-6">
+        <button @click="handleLogout" class="flex items-center gap-3 w-full px-4 py-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">
+          <LogOut class="w-4 h-4" /> Logout
         </button>
       </div>
+    </aside>
 
-      <div class="grid lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 space-y-6">
-          <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-white/5 shadow-2xl">
-            <h2 class="text-xl font-black text-slate-900 dark:text-white mb-8 flex items-center gap-3 uppercase tracking-tight">
-              <div class="p-2 bg-blue-600 rounded-lg"><Trophy class="w-5 h-5 text-white" /></div>
-              Add New Certificate
-            </h2>
+    <main class="flex-1 overflow-y-auto p-10 relative">
 
-            <div class="grid md:grid-cols-2 gap-6">
-              <div class="space-y-4">
-                <div>
-                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-2">Certificate Title</label>
-                  <input v-model="newCert.title" type="text" placeholder="e.g. Fullstack Web Dev" class="w-full px-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 text-slate-900 dark:text-white outline-none transition-all" />
-                </div>
-                <div>
-                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-2">Issuer / Organization</label>
-                  <input v-model="newCert.issuer" type="text" placeholder="e.g. Google, Dicoding" class="w-full px-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 text-slate-900 dark:text-white outline-none transition-all" />
-                </div>
-              </div>
+      <div v-if="isLoading" class="absolute inset-0 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <Loader2 class="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
 
-              <div class="space-y-4">
-                <div>
-                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-2">Issue Date</label>
-                  <input v-model="newCert.date" type="text" placeholder="e.g. March 2026" class="w-full px-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 text-slate-900 dark:text-white outline-none transition-all" />
-                </div>
-                <div>
-                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-2">Credential Link (URL)</label>
-                  <input v-model="newCert.link" type="text" placeholder="https://..." class="w-full px-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 text-slate-900 dark:text-white outline-none transition-all" />
-                </div>
-              </div>
-            </div>
-
-            <button @click="saveCertificate" :disabled="isSaving" class="mt-10 w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all shadow-xl shadow-blue-500/25 flex items-center justify-center gap-3">
-              <span v-if="!isSaving" class="flex items-center gap-2">Publish Certificate <CheckCircle class="w-4 h-4" /></span>
-              <span v-else class="flex items-center gap-2 animate-pulse text-blue-100">Uploading to Supabase...</span>
-            </button>
-          </div>
+      <div v-if="activeMenu === 'home'" class="space-y-6">
+        <div>
+          <h1 class="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Overview Dashboard</h1>
+          <p class="text-xs font-medium text-slate-500 mt-1">
+            Selamat datang kembali, <span class="font-bold text-blue-600 dark:text-blue-400">{{ adminName }}</span>! Berikut rangkuman data portfolio aktif Anda.
+          </p>
         </div>
 
-        <div class="lg:col-span-1">
-          <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/5 shadow-2xl h-full flex flex-col">
-            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 block text-center">Certificate File</label>
-
-            <div v-if="!imageFile" class="relative group flex-1 min-h-[250px]">
-              <input type="file" @change="onFileChange" accept="image/*,application/pdf" class="absolute inset-0 w-full h-full opacity-0 z-50 cursor-pointer" />
-              <div class="h-full border-2 border-dashed border-slate-200 dark:border-white/10 rounded-[2rem] flex flex-col items-center justify-center p-6 transition-all group-hover:border-blue-600 group-hover:bg-blue-50/50 dark:group-hover:bg-blue-600/5">
-                <div class="p-4 bg-slate-100 dark:bg-white/5 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Upload class="w-8 h-8 text-slate-400 group-hover:text-blue-600" />
-                </div>
-                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 text-center uppercase tracking-tighter">Drop Image or PDF</p>
-                <p class="text-[9px] text-slate-400 mt-2 font-medium">MAX SIZE: 5MB</p>
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl shadow-sm flex items-center gap-4">
+            <div class="p-4 bg-blue-600/10 rounded-2xl text-blue-600"><Trophy class="w-6 h-6" /></div>
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Kredensial</p>
+              <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ certificates.length }} Sertifikat</h3>
             </div>
-
-            <div v-else class="relative flex-1 min-h-[250px] rounded-[2rem] overflow-hidden group bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-              <img v-if="!isPdf" :src="imagePreview" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              <div v-else class="flex flex-col items-center p-6 text-center">
-                <div class="p-5 bg-red-500/10 rounded-2xl mb-4">
-                  <FileText class="w-16 h-16 text-red-500" />
-                </div>
-                <p class="text-xs font-black text-slate-700 dark:text-slate-200 uppercase truncate max-w-[150px]">{{ imageFile.name }}</p>
-                <p class="text-[10px] font-bold text-red-500 uppercase mt-1">PDF Document</p>
-              </div>
-              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-                <button @click="removeImage" class="p-4 bg-red-500 text-white rounded-full hover:scale-110 transition-transform active:scale-95 shadow-xl">
-                  <X class="w-6 h-6" />
-                </button>
-              </div>
+          </div>
+          <div class="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl shadow-sm flex items-center gap-4">
+            <div class="p-4 bg-purple-600/10 rounded-2xl text-purple-600"><Code2 class="w-6 h-6" /></div>
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Karya</p>
+              <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ projects.length }} Project</h3>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <div v-if="activeMenu === 'upload-certificates'" class="max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6">
+          {{ isEditingCert ? 'Edit Kredensial Sertifikat' : 'Upload Sertifikat Baru' }}
+        </h2>
+        <form @submit.prevent="handleCertSubmit" class="space-y-5">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Judul Sertifikat</label>
+            <input v-model="certForm.title" type="text" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Penerbit / Issuer</label>
+              <input v-model="certForm.issuer" type="text" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Tanggal Terbit</label>
+              <input v-model="certForm.date" type="text" placeholder="Contoh: April 2026" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Link Verifikasi (URL Dokumen / PDF)</label>
+            <input v-model="certForm.link" type="url" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+          </div>
+          <div class="flex gap-3 pt-4">
+            <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/20">
+              <Save class="w-4 h-4" /> Simpan Data
+            </button>
+            <button type="button" @click="activeMenu = 'edit-certificates'; resetCertForm()" class="px-6 py-3 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 cursor-pointer">
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div v-if="activeMenu === 'edit-certificates'" class="space-y-6">
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Daftar Sertifikat Terpublikasi</h2>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-sm">
+          <table class="w-full text-left border-collapse">
+            <thead>
+            <tr class="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5">
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Judul</th>
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Issuer</th>
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Tanggal</th>
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400 text-right">Aksi</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+            <tr v-for="cert in certificates" :key="cert.id" class="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
+              <td class="p-4 text-xs font-bold text-slate-900 dark:text-white uppercase">{{ cert.title }}</td>
+              <td class="p-4 text-xs text-slate-500 dark:text-slate-400 font-medium">{{ cert.issuer }}</td>
+              <td class="p-4 text-xs text-slate-500 dark:text-slate-400 font-medium">{{ cert.date }}</td>
+              <td class="p-4 text-right space-x-2">
+                <button @click="editCert(cert)" class="p-2 bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition-all cursor-pointer"><Pencil class="w-3.5 h-3.5" /></button>
+                <button @click="deleteCert(cert.id)" class="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-all cursor-pointer"><Trash2 class="w-3.5 h-3.5" /></button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div v-if="activeMenu === 'upload-project'" class="max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6">
+          {{ isEditingProject ? 'Edit Informasi Project' : 'Upload Project Baru' }}
+        </h2>
+        <form @submit.prevent="handleProjectSubmit" class="space-y-5">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Nama Project</label>
+            <input v-model="projectForm.title" type="text" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Deskripsi Singkat</label>
+            <textarea v-model="projectForm.description" rows="3" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Progress Kerja (%)</label>
+              <input v-model="projectForm.progress" type="number" min="0" max="100" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Link Repository GitHub</label>
+              <input v-model="projectForm.github_url" type="url" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Tags Teknologi (Pisahkan dengan koma)</label>
+            <input v-model="projectForm.tagsInput" type="text" placeholder="Contoh: Vue.js, Tailwind, Golang" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Timeline Activity (Format JSON Array)</label>
+            <textarea v-model="projectForm.timelineInput" rows="4" placeholder='[\n  { "month": "Maret", "summary": "Rilis Fitur Auth" }\n]' class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white"></textarea>
+          </div>
+          <div class="flex gap-3 pt-4">
+            <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/20">
+              <Save class="w-4 h-4" /> {{ isEditingProject ? 'Perbarui Project' : 'Publish Project' }}
+            </button>
+            <button type="button" @click="activeMenu = 'edit-project'; resetProjectForm()" class="px-6 py-3 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 cursor-pointer">
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div v-if="activeMenu === 'edit-project'" class="space-y-6">
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Daftar Project Terpublikasi</h2>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-sm">
+          <table class="w-full text-left border-collapse">
+            <thead>
+            <tr class="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5">
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Nama Project</th>
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Progress</th>
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Tech Stack</th>
+              <th class="p-4 text-[10px] font-black uppercase tracking-wider text-slate-400 text-right">Aksi</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+            <tr v-for="proj in projects" :key="proj.id" class="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
+              <td class="p-4 text-xs font-bold text-slate-900 dark:text-white uppercase">{{ proj.title }}</td>
+              <td class="p-4 text-xs text-slate-500 dark:text-slate-400 font-medium">{{ proj.progress }}%</td>
+              <td class="p-4 text-xs text-slate-500 dark:text-slate-400 font-medium flex flex-wrap gap-1 items-center h-full pt-5">
+                <span class="inline-block px-2 py-0.5 bg-slate-100 dark:bg-white/5 rounded text-[10px] font-bold uppercase" v-for="tag in proj.tags" :key="tag">{{ tag }}</span>
+              </td>
+              <td class="p-4 text-right space-x-2">
+                <button @click="editProject(proj)" class="p-2 bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition-all cursor-pointer"><Pencil class="w-3.5 h-3.5" /></button>
+                <button @click="deleteProject(proj.id)" class="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-all cursor-pointer"><Trash2 class="w-3.5 h-3.5" /></button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
   </div>
 </template>
