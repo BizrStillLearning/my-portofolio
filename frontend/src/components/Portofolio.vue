@@ -11,16 +11,23 @@ import {
   Clock3,
   GitCommitVertical,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  FolderGit2,
+  Users,
+  Star
 } from 'lucide-vue-next';
 
 const { t, tm, rt } = useI18n();
 const activeTab = ref('projects');
 
-// State penyimpanan data dari Supabase
 const certificatesFromDB = ref([]);
 const projectsFromDB = ref([]);
+const techStack = ref([]);
+const githubProfile = ref(null);
 const isLoadingProjects = ref(false);
+const isLoadingTech = ref(false);
+
+const GITHUB_USERNAME = 'BizrStillLearning';
 
 const tabs = [
   { id: 'projects', label: 'portfolio.tabs.projects', icon: Code2 },
@@ -28,7 +35,23 @@ const tabs = [
   { id: 'tech', label: 'portfolio.tabs.tech', icon: Layers },
 ];
 
-// FETCH DATA: Certificates dari Supabase
+const techMap = {
+  'Vue': { icon: 'vuedotjs/41B883', cat: 'Frontend Framework', color: 'bg-[#41B883]' },
+  'JavaScript': { icon: 'javascript/F7DF1E', cat: 'Core Language', color: 'bg-[#F7DF1E]' },
+  'TypeScript': { icon: 'typescript/3178C6', cat: 'Core Language', color: 'bg-[#3178C6]' },
+  'PHP': { icon: 'php/777BB4', cat: 'Backend', color: 'bg-[#777BB4]' },
+  'Python': { icon: 'python/3776AB', cat: 'AI/Data', color: 'bg-[#3776AB]' },
+  'HTML': { icon: 'html5/E34F26', cat: 'Markup', color: 'bg-[#E34F26]' },
+  'CSS': { icon: 'tailwindcss/06B6D4', cat: 'Tailwind CSS', color: 'bg-[#06B6D4]' },
+  'Java': { icon: 'java/007396', cat: 'Backend', color: 'bg-[#007396]' },
+  'Dart': { icon: 'dart/0175C2', cat: 'Mobile', color: 'bg-[#0175C2]' },
+  'C++': { icon: 'cplusplus/00599C', cat: 'System', color: 'bg-[#00599C]' },
+  'C#': { icon: 'csharp/239120', cat: 'Backend', color: 'bg-[#239120]' },
+  'Go': { icon: 'go/00ADD8', cat: 'Backend', color: 'bg-[#00ADD8]' },
+  'Blade': { icon: 'laravel/FF2D20', cat: 'Template Engine', color: 'bg-[#FF2D20]' },
+  'SCSS': { icon: 'sass/CC6699', cat: 'Styling', color: 'bg-[#CC6699]' }
+};
+
 const fetchCertificates = async () => {
   try {
     const { data, error } = await supabase
@@ -43,44 +66,122 @@ const fetchCertificates = async () => {
   }
 };
 
-// FETCH DATA: Projects dari Supabase
-const fetchProjects = async () => {
+const fetchGitHubData = async () => {
   try {
+    isLoadingTech.value = true;
     isLoadingProjects.value = true;
-    const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('id', { ascending: true });
 
-    if (error) throw error;
-    projectsFromDB.value = data || [];
+    const headers = {};
+    const token = import.meta.env.VITE_GITHUB_TOKEN;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const profileRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`, { headers });
+    if (profileRes.ok) {
+      githubProfile.value = await profileRes.json();
+    }
+
+    const reposRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=20`, { headers });
+    if (!reposRes.ok) throw new Error('Gagal mengambil repositori dari GitHub');
+    const repos = await reposRes.json();
+
+    const projectRepos = repos.filter(repo => !repo.fork).slice(0, 6);
+
+    const projectPromises = projectRepos.map(async (repo) => {
+      let repoLangs = [];
+      if (repo.languages_url) {
+        const langRes = await fetch(repo.languages_url, { headers });
+        if (langRes.ok) {
+          const langsData = await langRes.json();
+          const totalBytes = Object.values(langsData).reduce((a, b) => a + b, 0);
+
+          repoLangs = Object.entries(langsData).map(([lang, bytes]) => ({
+            name: lang === 'CSS' ? 'Tailwind' : lang,
+            percent: Math.round((bytes / totalBytes) * 100),
+            color: techMap[lang]?.color || 'bg-slate-500'
+          })).sort((a, b) => b.percent - a.percent).slice(0, 3);
+        }
+      }
+
+      const createdDate = new Date(repo.created_at).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+      const updatedDate = new Date(repo.updated_at).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+
+      return {
+        id: repo.id,
+        title: repo.name.replace(/[-_]/g, ' '),
+        description: repo.description || 'Tidak ada deskripsi tersedia.',
+        stars: repo.stargazers_count,
+        github_url: repo.html_url,
+        tags: repo.topics && repo.topics.length > 0 ? repo.topics : (repo.language ? [repo.language] : []),
+        repoLangs: repoLangs,
+        timeline: [
+          { month: createdDate, summary: 'Repository Dibuat' },
+          { month: updatedDate, summary: 'Update Terakhir' }
+        ]
+      };
+    });
+
+    projectsFromDB.value = await Promise.all(projectPromises);
+
+    const languageTally = {};
+    let totalBytesGlobal = 0;
+
+    for (const repo of repos) {
+      if (repo.languages_url) {
+        const langRes = await fetch(repo.languages_url, { headers });
+        if (langRes.ok) {
+          const langs = await langRes.json();
+          for (const [language, bytes] of Object.entries(langs)) {
+            languageTally[language] = (languageTally[language] || 0) + bytes;
+            totalBytesGlobal += bytes;
+          }
+        }
+      }
+    }
+
+    techStack.value = Object.entries(languageTally)
+        .map(([name, bytes]) => {
+          const percentage = Math.round((bytes / totalBytesGlobal) * 100);
+          const mapping = techMap[name] || { icon: 'github/000000', cat: 'Other' };
+
+          return {
+            name: name === 'CSS' ? 'Tailwind' : name,
+            level: percentage,
+            icon: mapping.icon,
+            cat: mapping.cat
+          };
+        })
+        .filter(tech => tech.level > 0)
+        .sort((a, b) => b.level - a.level)
+        .slice(0, 10);
+
   } catch (error) {
-    console.error('Error fetching projects:', error.message);
+    console.error('Error fetching data from GitHub:', error.message);
   } finally {
+    isLoadingTech.value = false;
     isLoadingProjects.value = false;
   }
 };
 
 onMounted(() => {
   fetchCertificates();
-  fetchProjects();
+  fetchGitHubData();
 });
 
-// LOGIK GERAKAN DATA: Projects Terintegrasi Supabase (Mendukung JSONB tags & timeline)
 const projectsData = computed(() => {
   return projectsFromDB.value.map((project) => ({
     id: project.id,
     title: project.title,
     description: project.description,
-    progress: project.progress || 0,
+    stars: project.stars || 0,
     github: project.github_url || '#',
-    // Memastikan data jsonb aman dibaca sebagai array di Vue template
     tags: Array.isArray(project.tags) ? project.tags : [],
+    repoLangs: project.repoLangs || [],
     timeline: Array.isArray(project.timeline) ? project.timeline : []
   }));
 });
 
-// LOGIK GERAKAN DATA: Certificates Terintegrasi Supabase (Gaya Clean Minimalis Tanpa Gambar)
 const certificatesData = computed(() => {
   return certificatesFromDB.value.map((cert) => {
     return {
@@ -91,19 +192,6 @@ const certificatesData = computed(() => {
     };
   });
 });
-
-const techStack = [
-  { name: 'Vue.js', level: 92, icon: 'vuedotjs/41B883', cat: 'Core Frontend' },
-  { name: 'Tailwind CSS', level: 95, icon: 'tailwindcss/06B6D4', cat: 'Core Design' },
-  { name: 'PHP', level: 88, icon: 'php/777BB4', cat: 'Core Backend' },
-  { name: 'React', level: 85, icon: 'react/61DAFB', cat: 'Frontend' },
-  { name: 'Next.js', level: 82, icon: 'nextdotjs/000000', cat: 'Framework' },
-  { name: 'Flutter', level: 78, icon: 'flutter/02569B', cat: 'Mobile' },
-  { name: 'Python', level: 88, icon: 'python/3776AB', cat: 'AI/Data' },
-  { name: 'Go', level: 75, icon: 'go/00ADD8', cat: 'Backend' },
-  { name: 'Laravel', level: 90, icon: 'laravel/FF2D20', cat: 'Framework' },
-  { name: 'Vercel', level: 90, icon: 'vercel/000000', cat: 'Deployment' },
-];
 
 const setTab = (id) => {
   activeTab.value = id;
@@ -137,11 +225,11 @@ const setTab = (id) => {
 
       <div v-if="activeTab === 'projects'" class="space-y-6">
         <div v-if="isLoadingProjects" class="py-20 text-center">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Syncing Projects Grid...</p>
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Syncing Repositories from GitHub...</p>
         </div>
 
         <div v-else-if="projectsData.length === 0" class="py-20 text-center text-slate-400 text-xs font-medium uppercase tracking-wider">
-          Belum ada project terpublikasi di database.
+          Belum ada repositori publik di GitHub.
         </div>
 
         <div v-else class="grid md:grid-cols-2 gap-8">
@@ -155,22 +243,37 @@ const setTab = (id) => {
           >
             <div class="p-8 pb-4">
               <div class="flex justify-between items-start mb-4">
-                <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ project.title }}</h3>
+                <h3 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight capitalize">{{ project.title }}</h3>
                 <div class="text-right shrink-0">
-                  <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest block mb-1">{{ t('portfolio.progress') }}</span>
-                  <p class="text-xl font-black text-slate-900 dark:text-white">{{ project.progress }}%</p>
+                  <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest block mb-1">Stars</span>
+                  <p class="text-xl font-black text-slate-900 dark:text-white flex items-center justify-end gap-1">
+                    <Star class="w-4 h-4 fill-current text-yellow-400" />
+                    {{ project.stars }}
+                  </p>
                 </div>
               </div>
 
-              <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 font-medium">{{ project.description }}</p>
+              <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 font-medium line-clamp-2">{{ project.description }}</p>
 
-              <div class="flex flex-wrap gap-1.5 mb-6">
+              <div v-if="project.tags.length > 0" class="flex flex-wrap gap-1.5 mb-6">
                 <span v-for="tag in project.tags" :key="tag" class="px-2.5 py-1 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/5 rounded-lg text-[9px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">{{ tag }}</span>
+              </div>
+
+              <div v-if="project.repoLangs && project.repoLangs.length > 0" class="mb-6">
+                <div class="flex h-1.5 w-full rounded-full overflow-hidden mb-2 bg-slate-200 dark:bg-slate-800">
+                  <div v-for="lang in project.repoLangs" :key="lang.name" :class="lang.color" :style="{ width: lang.percent + '%' }"></div>
+                </div>
+                <div class="flex flex-wrap gap-x-3 gap-y-1">
+                  <div v-for="lang in project.repoLangs" :key="lang.name" class="flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full" :class="lang.color"></span>
+                    <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400">{{ lang.name }} <span class="opacity-60">{{ lang.percent }}%</span></span>
+                  </div>
+                </div>
               </div>
 
               <div v-if="project.timeline.length > 0" class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/5">
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Clock3 class="w-3 h-3" /> {{ t('portfolio.recent_activity') }}
+                  <Clock3 class="w-3 h-3" /> Timeline Repositori
                 </p>
                 <div class="space-y-4">
                   <div v-for="(log, lIdx) in project.timeline.slice(-2)" :key="lIdx" class="flex gap-3 items-start group/log">
@@ -185,11 +288,11 @@ const setTab = (id) => {
             </div>
 
             <div class="px-8 pb-8 pt-4 border-t border-slate-200 dark:border-white/5 flex gap-4 items-center">
-              <a v-if="project.github && project.github !== '#'" :href="project.github" target="_blank" class="flex items-center gap-2 text-xs font-black uppercase text-slate-500 hover:text-blue-600 transition-colors group/link">
-                <Github class="w-4 h-4 transition-transform group-hover/link:rotate-12" /> Github
-              </a>
-              <a href="#" class="flex items-center gap-2 text-xs font-black uppercase text-slate-500 hover:text-blue-600 transition-colors group/link ml-auto">
-                {{ t('portfolio.details') }} <ChevronRight class="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
+              <a v-if="project.github && project.github !== '#'" :href="project.github" target="_blank" class="flex items-center gap-2 text-xs font-black uppercase text-slate-500 hover:text-blue-600 transition-colors group/link w-full justify-between">
+                <span class="flex items-center gap-2">
+                  <Github class="w-4 h-4 transition-transform group-hover/link:rotate-12" /> Lihat Repositori
+                </span>
+                <ChevronRight class="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
               </a>
             </div>
           </div>
@@ -242,25 +345,77 @@ const setTab = (id) => {
         </div>
       </div>
 
-      <div v-if="activeTab === 'tech'" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-        <div
-            v-for="tech in techStack"
-            :key="tech.name"
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :enter="{ opacity: 1, y: 0, transition: { delay: 50 } }"
-            class="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-[2rem] flex flex-col items-center text-center group hover:-translate-y-2 transition-all duration-500"
-            :class="{ 'border-blue-500/50 ring-1 ring-blue-500/20': tech.cat.includes('Core') }"
-        >
-          <img :src="`https://cdn.simpleicons.org/${tech.icon}`" class="w-10 h-10 mb-4 group-hover:scale-110 transition-transform" :alt="tech.name" />
-          <h4 class="text-sm font-black text-slate-900 dark:text-white mb-1 uppercase tracking-tighter">{{ tech.name }}</h4>
-          <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]" :class="{ 'text-blue-600': tech.cat.includes('Core') }">{{ tech.cat }}</span>
-          <div class="mt-4 w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-            <div class="h-full bg-blue-600 transition-all duration-1000" :style="{ width: tech.level + '%' }"></div>
+      <div v-if="activeTab === 'tech'" class="relative space-y-8">
+        <div v-if="isLoadingTech" class="py-20 text-center w-full">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">
+            Establishing GitHub Uplink...
+          </p>
+        </div>
+
+        <div v-else class="space-y-8">
+          <div v-if="githubProfile" v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0 }" class="flex flex-wrap gap-4 justify-center">
+            <a :href="githubProfile.html_url" target="_blank" class="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-white/5 hover:border-blue-500/50 transition-colors group">
+              <Github class="w-6 h-6 text-slate-900 dark:text-white group-hover:scale-110 transition-transform" />
+              <div>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Developer Profile</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-white">@{{ githubProfile.login }}</p>
+              </div>
+            </a>
+
+            <div class="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-white/5">
+              <FolderGit2 class="w-6 h-6 text-blue-600" />
+              <div>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Public Repos</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ githubProfile.public_repos }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-white/5">
+              <Users class="w-6 h-6 text-purple-600" />
+              <div>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Followers</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ githubProfile.followers }}</p>
+              </div>
+            </div>
           </div>
+
+          <div>
+            <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 text-center">Top Languages & Frameworks (Live from GitHub)</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+              <div
+                  v-for="tech in techStack"
+                  :key="tech.name"
+                  v-motion
+                  :initial="{ opacity: 0, y: 20 }"
+                  :enter="{ opacity: 1, y: 0, transition: { delay: 50 } }"
+                  class="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-[2rem] flex flex-col items-center text-center group hover:-translate-y-2 transition-all duration-500 relative overflow-hidden"
+                  :class="{ 'border-blue-500/50 ring-1 ring-blue-500/20': tech.level >= 30 }"
+              >
+                <div class="absolute top-4 right-4 text-[10px] font-black text-slate-300 dark:text-slate-600">
+                  {{ tech.level }}%
+                </div>
+
+                <img :src="`https://cdn.simpleicons.org/${tech.icon}`" class="w-10 h-10 mb-4 group-hover:scale-110 transition-transform" :alt="tech.name" />
+                <h4 class="text-sm font-black text-slate-900 dark:text-white mb-1 uppercase tracking-tighter">{{ tech.name }}</h4>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]" :class="{ 'text-blue-600': tech.level >= 30 }">{{ tech.cat }}</span>
+
+                <div class="mt-4 w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-600 transition-all duration-1000" :style="{ width: tech.level + '%' }"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="!isLoadingTech && techStack.length === 0" class="py-20 text-center">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+            No tech data found.
+          </p>
         </div>
       </div>
 
     </div>
   </section>
 </template>
+
+

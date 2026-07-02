@@ -42,7 +42,6 @@ const languages = [
   { code: 'ar', label: 'العربية', flagCode: 'sa' }
 ];
 
-// Computed untuk mencari URL gambar bendera aktif saat ini dari Flagcdn
 const currentFlagUrl = computed(() => {
   const current = languages.find(lang => lang.code === locale.value);
   const code = current ? current.flagCode : 'us';

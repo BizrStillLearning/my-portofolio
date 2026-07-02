@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { supabase } from '../supabase';
 import { useRouter } from 'vue-router';
 import { useThemeStore } from "../stores/themeStore.js";
-import { LockKeyhole, ArrowLeft, ShieldCheck } from "lucide-vue-next";
+import { LockKeyhole, ArrowLeft, ShieldCheck, Mail } from "lucide-vue-next";
 
 const themeStore = useThemeStore();
 const email = ref('');
@@ -14,7 +14,7 @@ const isSubmitting = ref(false);
 
 const login = async () => {
   if (!email.value || !password.value) {
-    errorMsg.value = "Harap isi semua kolom.";
+    errorMsg.value = "Harap masukkan email dan password.";
     return;
   }
 
@@ -74,26 +74,33 @@ const login = async () => {
       </div>
 
       <form @submit.prevent="login" class="space-y-5">
+
         <div class="space-y-2">
           <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Email Address</label>
-          <input
-              v-model="email"
-              type="email"
-              class="w-full px-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600/50 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-600/10 transition-all duration-300"
-          />
+          <div class="relative">
+            <Mail class="w-5 h-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+                v-model="email"
+                type="email"
+                placeholder="admin@example.com"
+                class="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600/50 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-600/10 transition-all duration-300"
+            />
+          </div>
         </div>
 
         <div class="space-y-2">
           <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Password</label>
-          <input
-              v-model="password"
-              type="password"
-              placeholder="••••••••"
-              class="w-full px-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600/50 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-600/10 transition-all duration-300"
-          />
+          <div class="relative">
+            <LockKeyhole class="w-5 h-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+                v-model="password"
+                type="password"
+                placeholder="••••••••"
+                class="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-blue-600/50 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-600/10 transition-all duration-300"
+            />
+          </div>
         </div>
 
-        <!-- Error Message -->
         <div v-if="errorMsg"
              v-motion
              :initial="{ opacity: 0, y: -10 }"

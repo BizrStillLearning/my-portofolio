@@ -123,7 +123,7 @@ const profileData = {
               class="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-12"
           >
             <a
-                href="#projects"
+                href="https://github.com/BizrStillLearning?tab=repositories"
                 class="w-full sm:w-auto px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/40 transition-all active:scale-95 flex items-center justify-center gap-2 group cursor-pointer"
             >
               {{ t('hero.projects_btn') }}

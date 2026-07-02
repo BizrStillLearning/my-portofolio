@@ -18,7 +18,7 @@ const features = computed(() => {
 });
 
 const stats = [
-  { value: '2+', label: 'about.stats.exp', icon: Milestone },
+  { value: '5+', label: 'about.stats.exp', icon: Milestone },
   { value: '20+', label: 'about.stats.projects', icon: Rocket }
 ];
 </script>

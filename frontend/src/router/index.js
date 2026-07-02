@@ -1,8 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { supabase } from '../supabase' // Ganti import firebase menjadi supabase
+import { supabase } from '../supabase'
 
 const routes = [
-    { path: '/login', name: 'Login', component: () => import('../views/Login.vue') },
+    {
+        path: '/login',
+        name: 'Login',
+        component: () => import('../views/Login.vue')
+    },
     {
         path: '/admin-dashboard',
         name: 'AdminDashboard',
@@ -11,8 +15,14 @@ const routes = [
     },
     {
         path: '/:lang(en|id|jp|kr|zh|es)?',
+        name: 'Home',
         component: () => import('../views/Home.vue')
-    }
+    },
+    // {
+    //     path: '/:pathMatch(.*)*',
+    //     name: 'NotFound',
+    //     component: () => import('../views/NotFound.vue') // Pastikan file ini ada
+    // }
 ]
 
 const router = createRouter({
@@ -20,17 +30,13 @@ const router = createRouter({
     routes
 })
 
-// Navigation Guard
 router.beforeEach(async (to, from, next) => {
-    // Mengambil session user saat ini dari Supabase
     const { data: { session } } = await supabase.auth.getSession()
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
 
     if (requiresAuth && !session) {
-        // Jika butuh login tapi tidak ada sesi, arahkan ke login
         next('/login')
     } else if (to.name === 'Login' && session) {
-        // Jika sudah login tapi mencoba akses halaman login, lempar ke dashboard
         next('/admin-dashboard')
     } else {
         next()
