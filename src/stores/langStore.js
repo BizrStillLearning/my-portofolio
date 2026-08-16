@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 
-// Impor file JSON (Pastikan file ini ada di folder src/locales/)
 import en from '../locales/en.json';
 import id from '../locales/id.json';
 import jp from '../locales/jp.json';

@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import Swal from 'sweetalert2';
+import { supabase } from '../supabase';
+import { useThemeStore } from '../stores/themeStore';
 import {
   Github,
   Linkedin,
@@ -13,6 +16,7 @@ import {
 } from 'lucide-vue-next';
 
 const { t, tm, rt, locale } = useI18n();
+const themeStore = useThemeStore();
 
 const DURATION = 800;
 const STAGGER = 100;
@@ -60,8 +64,59 @@ watch(locale, () => {
   isDeleting.value = false;
 });
 
+const cvUrl = ref(null);
+const isCvLoading = ref(true);
+
+const fetchCV = async () => {
+  try {
+    isCvLoading.value = true;
+
+    const { data, error } = await supabase.storage.from('documents').list('', {
+      search: 'cv-abidzar.pdf'
+    });
+
+    if (data && data.length > 0) {
+      const { data: publicUrlData } = supabase.storage.from('documents').getPublicUrl('cv-abidzar.pdf');
+      cvUrl.value = `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
+    } else {
+      cvUrl.value = null;
+    }
+  } catch (error) {
+    console.error("Gagal mengecek status CV:", error.message);
+  } finally {
+    isCvLoading.value = false;
+  }
+};
+
+const handleDownloadCV = () => {
+  if (cvUrl.value) {
+    window.open(cvUrl.value, '_blank');
+  } else {
+    Swal.fire({
+      icon: 'info',
+      title: 'Sedang Diperbarui',
+      text: 'Dokumen CV saat ini sedang dalam tahap pembaruan. Silakan periksa kembali beberapa saat lagi!',
+      confirmButtonText: 'Mengerti',
+      confirmButtonColor: '#2563EB',
+      background: themeStore.isDark ? '#0f172a' : '#ffffff',
+      color: themeStore.isDark ? '#f8fafc' : '#0f172a',
+      customClass: {
+        popup: 'rounded-[2rem]'
+      }
+    });
+  }
+};
+
+const scrollToPortfolio = () => {
+  const element = document.getElementById('portfolio');
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
 onMounted(() => {
   typeEffect();
+  fetchCV(); // Jalankan pengecekan CV saat web dimuat
 });
 
 const profileData = {
@@ -122,20 +177,22 @@ const profileData = {
               :enter="{ opacity: 1, y: 0, transition: { duration: DURATION, delay: STAGGER * 3 } }"
               class="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-12"
           >
-            <a
-                href="https://github.com/BizrStillLearning?tab=repositories"
+            <button
+                @click="scrollToPortfolio"
                 class="w-full sm:w-auto px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/40 transition-all active:scale-95 flex items-center justify-center gap-2 group cursor-pointer"
             >
               {{ t('hero.projects_btn') }}
               <ChevronRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </a>
-            <a
-                href="/cv.pdf"
-                class="w-full sm:w-auto px-10 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:border-blue-500/50 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            </button>
+
+            <button
+                @click="handleDownloadCV"
+                :disabled="isCvLoading"
+                class="w-full sm:w-auto px-10 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:border-blue-500/50 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
             >
               {{ t('hero.cv_btn') }}
               <Download class="w-4 h-4" />
-            </a>
+            </button>
           </div>
 
           <div

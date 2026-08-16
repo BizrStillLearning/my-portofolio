@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Code2, Palette, Rocket, Users, Milestone, Terminal } from 'lucide-vue-next';
+import { Code2, Palette, Rocket, Users, Milestone, Terminal, ExternalLink } from 'lucide-vue-next';
 
 const { t, tm, rt } = useI18n();
 
@@ -96,6 +96,18 @@ const stats = [
               </div>
             </div>
           </div>
+
+          <div class="pt-4">
+            <a
+                href="https://my-blogger-ivory.vercel.app/"
+                target="_blank"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 transition-all duration-300 border border-slate-200 dark:border-white/10 shadow-sm group"
+            >
+              {{ t('about.read_more') }}
+              <ExternalLink class="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
+          </div>
+
         </div>
       </div>
 
@@ -118,3 +130,4 @@ const stats = [
     </div>
   </section>
 </template>
+

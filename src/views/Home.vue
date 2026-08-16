@@ -5,12 +5,10 @@ import Navbar from '../components/Navbar.vue';
 import Hero from '../components/Hero.vue';
 
 import About from '../components/About.vue';
-import Skills from '../components/Skills.vue';
-import Projects from '../components/Project.vue';
 import Contact from '../components/Contact.vue';
 import Footer from '../components/Footer.vue';
 import ScrollToTop from '../components/ScrollToTop.vue';
-import Portofolio from "../components/Portofolio.vue";
+import Portfolio from "../components/Portfolio.vue";
 
 const isLoading = ref(true);
 
@@ -37,7 +35,7 @@ onMounted(() => {
     <main>
       <Hero />
       <About />
-      <Portofolio />
+      <Portfolio />
       <Contact />
     </main>
 
