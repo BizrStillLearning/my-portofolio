@@ -227,7 +227,7 @@ const profileData = {
             <div class="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-[450px] lg:h-[450px] p-4 rounded-[3rem] border-2 border-dashed border-blue-500/20 flex items-center justify-center">
               <div class="w-full h-full rounded-[2.5rem] overflow-hidden border-8 border-white dark:border-slate-800 shadow-2xl bg-slate-100 dark:bg-slate-900 group">
                 <img
-                    src="../assets/img/profile.png"
+                    src="../assets/img/Profile.png"
                     alt="Abidzar Profile"
                     class="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
                 >
