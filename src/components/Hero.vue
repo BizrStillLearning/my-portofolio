@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Swal from 'sweetalert2';
 import { supabase } from '../supabase';
@@ -9,56 +9,56 @@ import {
   Linkedin,
   Instagram,
   Mail,
-  Code2,
-  Rocket,
-  Download,
-  ChevronRight
+  ChevronRight,
+  ArrowDown,
+  FileText
 } from 'lucide-vue-next';
 
 const { t, tm, rt, locale } = useI18n();
 const themeStore = useThemeStore();
 
-const DURATION = 800;
-const STAGGER = 100;
-
-const displayText = ref("");
+const displayText = ref('');
 const roleIndex = ref(0);
 const charIndex = ref(0);
 const isDeleting = ref(false);
-const typeSpeed = ref(150);
 
 const roles = computed(() => {
   const rawRoles = tm('hero.roles');
-  return Array.isArray(rawRoles) ? rawRoles.map(role => rt(role)) : [];
+  return Array.isArray(rawRoles) ? rawRoles.map((role) => rt(role)) : [];
 });
+
+let typeTimer = null;
 
 const typeEffect = () => {
   if (roles.value.length === 0) return;
   const currentRole = roles.value[roleIndex.value];
 
+  let delay;
+
   if (isDeleting.value) {
-    displayText.value = currentRole.substring(0, charIndex.value - 1);
+    displayText.value = currentRole.slice(0, charIndex.value - 1);
     charIndex.value--;
-    typeSpeed.value = 50;
+    delay = 35;
   } else {
-    displayText.value = currentRole.substring(0, charIndex.value + 1);
+    displayText.value = currentRole.slice(0, charIndex.value + 1);
     charIndex.value++;
-    typeSpeed.value = 150;
+    delay = 55 + Math.random() * 55;
   }
 
   if (!isDeleting.value && charIndex.value === currentRole.length) {
     isDeleting.value = true;
-    typeSpeed.value = 2000;
+    delay = 2400;
   } else if (isDeleting.value && charIndex.value === 0) {
     isDeleting.value = false;
     roleIndex.value = (roleIndex.value + 1) % roles.value.length;
-    typeSpeed.value = 500;
+    delay = 420;
   }
-  setTimeout(typeEffect, typeSpeed.value);
+
+  typeTimer = setTimeout(typeEffect, delay);
 };
 
 watch(locale, () => {
-  displayText.value = "";
+  displayText.value = '';
   charIndex.value = 0;
   roleIndex.value = 0;
   isDeleting.value = false;
@@ -77,12 +77,12 @@ const fetchCV = async () => {
 
     if (data && data.length > 0) {
       const { data: publicUrlData } = supabase.storage.from('documents').getPublicUrl('cv-abidzar.pdf');
-      cvUrl.value = `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
+      cvUrl.value = `${publicUrlData.publicUrl}?t=${Date.now()}`;
     } else {
       cvUrl.value = null;
     }
   } catch (error) {
-    console.error("Gagal mengecek status CV:", error.message);
+    console.error('Gagal mengecek status CV:', error.message);
   } finally {
     isCvLoading.value = false;
   }
@@ -98,29 +98,55 @@ const handleDownloadCV = () => {
       text: 'Dokumen CV saat ini sedang dalam tahap pembaruan. Silakan periksa kembali beberapa saat lagi!',
       confirmButtonText: 'Mengerti',
       confirmButtonColor: '#2563EB',
-      background: themeStore.isDark ? '#0f172a' : '#ffffff',
+      background: themeStore.isDark ? '#020617' : '#ffffff',
       color: themeStore.isDark ? '#f8fafc' : '#0f172a',
-      customClass: {
-        popup: 'rounded-[2rem]'
-      }
+      customClass: { popup: 'rounded-2xl' }
     });
   }
 };
 
 const scrollToPortfolio = () => {
-  const element = document.getElementById('portfolio');
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
-  }
+  document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+const sectionRef = ref(null);
+const glowX = ref(50);
+const glowY = ref(40);
+
+const handleMouseMove = (e) => {
+  const rect = sectionRef.value?.getBoundingClientRect();
+  if (!rect) return;
+  glowX.value = ((e.clientX - rect.left) / rect.width) * 100;
+  glowY.value = ((e.clientY - rect.top) / rect.height) * 100;
+};
+
+const tiltRef = ref(null);
+const tiltX = ref(0);
+const tiltY = ref(0);
+
+const handleTilt = (e) => {
+  const rect = tiltRef.value?.getBoundingClientRect();
+  if (!rect) return;
+  const px = (e.clientX - rect.left) / rect.width - 0.5;
+  const py = (e.clientY - rect.top) / rect.height - 0.5;
+  tiltX.value = py * -6;
+  tiltY.value = px * 8;
+};
+
+const resetTilt = () => {
+  tiltX.value = 0;
+  tiltY.value = 0;
 };
 
 onMounted(() => {
   typeEffect();
-  fetchCV(); // Jalankan pengecekan CV saat web dimuat
+  fetchCV();
 });
 
+onUnmounted(() => clearTimeout(typeTimer));
+
 const profileData = {
-  name: "Abidzar Dzakwan Sahudi",
+  name: 'Abidzar Dzakwan Sahudi',
   socials: [
     { icon: Github, link: 'https://github.com/BizrStillLearning', label: 'GitHub' },
     { icon: Linkedin, link: 'https://www.linkedin.com/in/abidzar-dzakwan-sahudi-011593388/', label: 'LinkedIn' },
@@ -132,128 +158,233 @@ const profileData = {
 
 <template>
   <section
+      ref="sectionRef"
       id="home"
-      class="min-h-screen flex items-center justify-center relative overflow-hidden pt-32 px-6 pb-20 transition-colors duration-700 bg-slate-50 dark:bg-[#020617]"
+      @mousemove="handleMouseMove"
+      class="relative min-h-screen flex items-center overflow-hidden bg-slate-50 dark:bg-[#020617] pt-28 pb-24"
   >
-    <div class="absolute inset-0 z-0 pointer-events-none">
-      <div class="absolute inset-0 bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-20 dark:opacity-10"></div>
-      <div class="absolute top-1/4 -left-20 w-96 h-96 bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
-      <div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[120px] animate-pulse delay-2000"></div>
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+
+      <div class="absolute inset-0 bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center opacity-[0.15] dark:opacity-[0.07] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,black,transparent)]"></div>
+
+      <svg
+          class="absolute inset-0 w-full h-full opacity-[0.55] dark:opacity-[0.4] text-slate-400 dark:text-slate-600"
+          style="mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, black, transparent)"
+          preserveAspectRatio="xMidYMid slice"
+          viewBox="0 0 1200 800"
+      >
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5">
+        <path d="M-60 220 C 120 120, 260 320, 180 460 C 120 560, -40 520, -80 420"/>
+        <path d="M-60 260 C 100 170, 220 340, 160 450 C 110 530, -20 500, -60 420"/>
+        <path d="M-60 300 C 90 220, 190 360, 145 440 C 105 505, 0 480, -45 415"/>
+        <path d="M-60 340 C 80 270, 165 380, 130 430 C 95 478, 15 462, -30 410"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45">
+        <path d="M1260 560 C 1080 480, 960 640, 1030 760 C 1085 850, 1240 810, 1280 720"/>
+        <path d="M1260 600 C 1100 530, 1000 660, 1060 755 C 1105 825, 1230 790, 1265 715"/>
+        <path d="M1260 640 C 1120 580, 1040 680, 1090 750 C 1125 802, 1220 772, 1250 710"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1" opacity="0.5">
+        <circle cx="1050" cy="140" r="14"/>
+        <circle cx="1050" cy="140" r="26"/>
+        <circle cx="1050" cy="140" r="38" opacity="0.6"/>
+      </g>
+      <g fill="currentColor" opacity="0.55">
+        <circle cx="300" cy="640" r="2.5"/>
+        <circle cx="340" cy="670" r="1.8"/>
+        <circle cx="270" cy="680" r="1.5"/>
+        <circle cx="880" cy="120" r="2.2"/>
+        <circle cx="920" cy="150" r="1.6"/>
+        <circle cx="620" cy="90" r="2"/>
+        <circle cx="150" cy="580" r="2.2"/>
+        <circle cx="1120" cy="420" r="2.4"/>
+        <circle cx="1160" cy="460" r="1.6"/>
+      </g>
+      <g stroke="currentColor" stroke-width="1.4" opacity="0.5" stroke-linecap="round">
+        <path d="M420 160 v18 M411 169 h18"/>
+        <path d="M760 700 v16 M752 708 h16"/>
+        <path d="M180 380 v14 M173 387 h14"/>
+        <path d="M1000 620 v18 M991 629 h18"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1" opacity="0.35">
+        <path d="M480 760 A 90 90 0 0 1 570 700"/>
+        <path d="M700 60 A 70 70 0 0 1 760 130"/>
+      </g>
+      </svg>
+
+      <div class="absolute inset-0 opacity-30 dark:opacity-25">
+        <svg
+            class="absolute w-[140%] h-[140%] -top-[20%] -left-[20%] animate-[drift_26s_ease-in-out_infinite_alternate] text-blue-500 dark:text-blue-400"
+            fill="none"
+            viewBox="0 0 1200 800"
+            preserveAspectRatio="xMidYMid slice"
+        >
+          <g stroke="currentColor" stroke-width="1" opacity="0.35">
+            <path d="M100 700 C 300 500, 500 750, 700 550 C 850 400, 1000 600, 1150 450"/>
+            <path d="M50 650 C 280 470, 520 700, 720 520 C 860 390, 1020 560, 1180 420"/>
+            <path d="M150 750 C 330 540, 520 780, 720 580 C 870 430, 1030 630, 1200 480"/>
+          </g>
+          <g fill="currentColor" opacity="0.3">
+            <circle cx="240" cy="590" r="3"/>
+            <circle cx="540" cy="660" r="2.2"/>
+            <circle cx="840" cy="500" r="2.6"/>
+            <circle cx="1080" cy="560" r="2"/>
+          </g>
+        </svg>
+      </div>
+
+      <div
+          class="absolute inset-0 transition-[background] duration-300 ease-out"
+          :style="{ background: `radial-gradient(560px circle at ${glowX}% ${glowY}%, rgba(37,99,235,0.10), transparent 65%)` }"
+      ></div>
+
+      <div class="absolute inset-0 opacity-[0.35] dark:opacity-[0.5] mix-blend-overlay" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E&quot;)"></div>
     </div>
 
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="flex flex-col items-center lg:flex-row gap-16 lg:gap-24">
+    <div class="relative z-10 mx-auto w-full max-w-6xl px-6">
+      <div class="flex flex-col-reverse lg:flex-row items-center gap-14 lg:gap-20">
+        <div class="w-full lg:w-3/5 lg:text-left text-center">
+          <h1
+              v-motion
+              :initial="{ opacity: 0, y: 24 }"
+              :enter="{ opacity: 1, y: 0, transition: { duration: 700, delay: 200, ease: [0.22, 1, 0.36, 1] } }"
+              class="text-4xl sm:text-5xl md:text-[3.6rem] font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-5"
+          >
+            {{ t('hero.hello') }}
+            <span class="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 dark:from-blue-400 dark:via-indigo-300 dark:to-blue-400">
+              {{ profileData.name }}
+            </span>
+          </h1>
 
-        <div class="w-full lg:w-3/5 text-center lg:text-left order-2 lg:order-1">
           <div
               v-motion
-              :initial="{ opacity: 0, x: -50 }"
-              :enter="{ opacity: 1, x: 0, transition: { duration: DURATION, delay: STAGGER } }"
+              :initial="{ opacity: 0 }"
+              :enter="{ opacity: 1, transition: { duration: 600, delay: 350 } }"
+              class="h-9 sm:h-11 mb-7 flex lg:justify-start justify-center"
           >
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 leading-[1.1]">
-              {{ t('hero.hello') }} <br>
-              <span class="text-gradient font-black">{{ profileData.name }}</span>
-            </h1>
-
-            <div class="h-12 sm:h-16 mb-6">
-              <span class="text-2xl sm:text-3xl md:text-4xl font-mono font-bold text-blue-600 dark:text-blue-400">
-                {{ displayText }}<span class="animate-pulse">|</span>
-              </span>
-            </div>
+            <span class="text-xl sm:text-2xl md:text-[1.7rem] font-mono font-semibold text-slate-700 dark:text-slate-300">
+              {{ displayText }}<span class="inline-block w-[2px] h-[1.1em] align-[-0.15em] bg-blue-600 dark:bg-blue-400 animate-[blink_1.05s_step-end_infinite]"></span>
+            </span>
           </div>
 
           <p
               v-motion
-              :initial="{ opacity: 0, y: 20 }"
-              :enter="{ opacity: 1, y: 0, transition: { duration: DURATION, delay: STAGGER * 2 } }"
-              class="text-slate-600 dark:text-slate-400 text-lg md:text-xl mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium"
+              :initial="{ opacity: 0, y: 16 }"
+              :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 450 } }"
+              class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0"
           >
             {{ t('hero.desc') }}
           </p>
 
           <div
               v-motion
-              :initial="{ opacity: 0, y: 20 }"
-              :enter="{ opacity: 1, y: 0, transition: { duration: DURATION, delay: STAGGER * 3 } }"
-              class="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-12"
+              :initial="{ opacity: 0, y: 16 }"
+              :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 550 } }"
+              class="flex flex-col sm:flex-row items-center lg:items-start gap-3 mb-12"
           >
             <button
                 @click="scrollToPortfolio"
-                class="w-full sm:w-auto px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/40 transition-all active:scale-95 flex items-center justify-center gap-2 group cursor-pointer"
+                class="group relative w-full sm:w-auto px-7 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm tracking-wide transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
             >
               {{ t('hero.projects_btn') }}
-              <ChevronRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              <span class="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10 dark:ring-black/10"></span>
             </button>
 
             <button
                 @click="handleDownloadCV"
                 :disabled="isCvLoading"
-                class="w-full sm:w-auto px-10 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:border-blue-500/50 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+                class="group w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold text-sm tracking-wide border transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer
+                     border-slate-300 dark:border-white/15 text-slate-900 dark:text-white hover:border-blue-500/60 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-0.5
+                     disabled:opacity-50 disabled:cursor-wait disabled:hover:translate-y-0"
             >
-              {{ t('hero.cv_btn') }}
-              <Download class="w-4 h-4" />
+              <FileText v-if="isCvLoading" class="w-4 h-4 animate-pulse" />
+              <ChevronRight v-else-if="!cvUrl" class="w-4 h-4 opacity-40" />
+              <template v-else>{{ t('hero.cv_btn') }}</template>
+              <span v-if="!isCvLoading && cvUrl" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             </button>
           </div>
 
           <div
-              class="flex justify-center lg:justify-start gap-4"
               v-motion
               :initial="{ opacity: 0 }"
-              :enter="{ opacity: 1, transition: { delay: STAGGER * 4 } }"
+              :enter="{ opacity: 1, transition: { duration: 600, delay: 700 } }"
+              class="flex justify-center lg:justify-start items-center gap-3"
           >
             <a
                 v-for="social in profileData.socials"
                 :key="social.label"
                 :href="social.link"
                 target="_blank"
-                v-motion
-                :hovered="{ y: -5, scale: 1.1 }"
-                class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors shadow-sm"
+                rel="noopener noreferrer"
+                :aria-label="social.label"
+                class="group flex items-center p-3 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-500/40 transition-all duration-300 ease-out hover:-translate-y-0.5"
             >
-              <component :is="social.icon" class="w-6 h-6" />
+              <component :is="social.icon" class="w-4 h-4 shrink-0" />
+
+              <span class="text-xs font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-2.5">
+      {{ social.label }}
+    </span>
             </a>
           </div>
         </div>
 
         <div
             v-motion
-            :initial="{ opacity: 0, scale: 0.8, rotate: 5 }"
-            :enter="{ opacity: 1, scale: 1, rotate: 0, transition: { type: 'spring', damping: 15, delay: 200 } }"
-            class="w-full lg:w-2/5 flex justify-center order-1 lg:order-2"
+            :initial="{ opacity: 0, scale: 0.96 }"
+            :enter="{ opacity: 1, scale: 1, transition: { duration: 800, delay: 300, ease: [0.22, 1, 0.36, 1] } }"
+            class="w-full lg:w-2/5 flex justify-center"
         >
-          <div class="relative">
-            <div class="absolute inset-0 bg-gradient-to-tr from-blue-600 to-indigo-400 rounded-full animate-spin-slow opacity-20 blur-3xl"></div>
+          <div
+              ref="tiltRef"
+              @mousemove="handleTilt"
+              @mouseleave="resetTilt"
+              class="relative select-none"
+              style="perspective: 900px"
+          >
+            <div class="absolute -inset-[3px] rounded-[1.75rem] opacity-70 dark:opacity-50 animate-[spin_9s_linear_infinite]" style="background: conic-gradient(from 0deg, transparent 0%, rgba(59,130,246,0.6) 12%, transparent 26%, transparent 55%, rgba(99,102,241,0.5) 68%, transparent 82%)"></div>
+            <div class="absolute -inset-[3px] rounded-[1.75rem] bg-slate-50 dark:bg-[#020617]"></div>
 
-            <div class="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-[450px] lg:h-[450px] p-4 rounded-[3rem] border-2 border-dashed border-blue-500/20 flex items-center justify-center">
-              <div class="w-full h-full rounded-[2.5rem] overflow-hidden border-8 border-white dark:border-slate-800 shadow-2xl bg-slate-100 dark:bg-slate-900 group">
-                <img
-                    src="../assets/img/Profile.png"
-                    alt="Abidzar Profile"
-                    class="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
-                >
-              </div>
-
-              <div
-                  v-motion
-                  :initial="{ x: 50, opacity: 0 }"
-                  :enter="{ x: 0, opacity: 1, transition: { delay: 600 } }"
-                  class="absolute -top-4 -right-4 bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-2xl border border-slate-100 dark:border-white/5 animate-bounce-slow"
+            <div
+                class="relative w-64 h-64 sm:w-72 sm:h-72 lg:w-[340px] lg:h-[340px] rounded-[1.6rem] overflow-hidden bg-slate-200 dark:bg-slate-800 shadow-[0_25px_60px_-15px_rgba(2,6,23,0.35)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out"
+                :style="{ transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg)` }"
+            >
+              <img
+                  src="../assets/img/Profile.png"
+                  alt="Foto profil Abidzar Dzakwan Sahudi"
+                  class="w-full h-full object-cover transition-transform duration-700 ease-out"
+                  :style="{ transform: `scale(1.02) translate(${tiltY * 1.5}px, ${tiltX * -1.5}px)` }"
               >
-                <Code2 class="w-8 h-8 text-blue-600" />
-              </div>
-              <div
-                  v-motion
-                  :initial="{ x: -50, opacity: 0 }"
-                  :enter="{ x: 0, opacity: 1, transition: { delay: 800 } }"
-                  class="absolute -bottom-4 -left-4 bg-blue-600 p-5 rounded-3xl shadow-2xl animate-bounce-slow-reverse"
-              >
-                <Rocket class="w-8 h-8 text-white" />
-              </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/25 via-transparent to-transparent pointer-events-none"></div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
+
+    <button
+        @click="scrollToPortfolio"
+        aria-label="Scroll ke portfolio"
+        class="absolute bottom-7 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-slate-400 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+        v-motion
+        :initial="{ opacity: 0 }"
+        :enter="{ opacity: 1, transition: { delay: 1200 } }"
+    >
+      <span class="text-[10px] font-medium uppercase tracking-[0.2em]">{{ t('hero.scroll', 'Scroll') }}</span>
+      <ArrowDown class="w-4 h-4 animate-bounce" />
+    </button>
   </section>
 </template>
+
+<style scoped>
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-1.5%, 1%) scale(1.02); }
+  100% { transform: translate(1%, -1.5%) scale(1); }
+}
+</style>

@@ -131,3 +131,4 @@ const stats = [
   </section>
 </template>
 
+Lanjut untuk aboutnya

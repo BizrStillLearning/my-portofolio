@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { supabase } from '../supabase';
-import { Code2, Trophy, Layers } from 'lucide-vue-next';
+import { Code2, Trophy, Layers, Star, GitFork, Users, BookOpen } from 'lucide-vue-next';
 
 import ProjectsTab from './portfolio/ProjectsTab.vue';
 import CertificatesTab from './portfolio/CertificatesTab.vue';
@@ -21,9 +21,9 @@ const isLoadingTech = ref(false);
 const GITHUB_USERNAME = 'BizrStillLearning';
 
 const tabs = [
-  { id: 'projects', label: 'portfolio.tabs.projects', icon: Code2 },
-  { id: 'certificates', label: 'portfolio.tabs.certificates', icon: Trophy },
-  { id: 'tech', label: 'portfolio.tabs.tech', icon: Layers },
+  { id: 'projects', label: 'portfolio.tabs.projects', icon: Code2, count: computed(() => projectsFromDB.value.length) },
+  { id: 'certificates', label: 'portfolio.tabs.certificates', icon: Trophy, count: computed(() => certificatesFromDB.value.length) },
+  { id: 'tech', label: 'portfolio.tabs.tech', icon: Layers, count: computed(() => techStack.value.length) },
 ];
 
 const techMap = {
@@ -207,51 +207,176 @@ const certificatesData = computed(() => {
 const setTab = (id) => {
   activeTab.value = id;
 };
+
+const githubStats = computed(() => {
+  if (!githubProfile.value) return [];
+  const p = githubProfile.value;
+  return [
+    { icon: BookOpen, label: 'Repositories', value: p.public_repos },
+    { icon: Users, label: 'Followers', value: p.followers },
+    { icon: GitFork, label: 'Following', value: p.following },
+    { icon: Star, label: 'Gists', value: p.public_gists }
+  ].filter(s => typeof s.value === 'number');
+});
 </script>
 
 <template>
-  <section id="portfolio" class="py-24 relative overflow-hidden bg-white dark:bg-[#020617] transition-colors duration-700">
-    <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center"></div>
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+  <section id="portfolio" class="relative py-28 overflow-hidden bg-slate-50 dark:bg-[#020617]">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
 
-      <div v-motion :initial="{ opacity: 0, y: 30 }" :visible-once="{ opacity: 1, y: 0 }" class="text-center mb-16">
-        <h2 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight">
-          {{ t('portfolio.title_part1') }} <span class="text-gradient font-black">{{ t('portfolio.title_part2') }}</span>
-        </h2>
+      <div class="absolute inset-0 bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center opacity-[0.15] dark:opacity-[0.07] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black,transparent)]"></div>
 
-        <div class="inline-flex p-1.5 bg-slate-100 dark:bg-white/5 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-white/10 mt-4">
+      <svg
+          class="absolute inset-0 w-full h-full opacity-[0.5] dark:opacity-[0.35] text-slate-400 dark:text-slate-600"
+          style="mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, black, transparent)"
+          preserveAspectRatio="xMidYMid slice"
+          viewBox="0 0 1200 800"
+          fill="none"
+      >
+        <g stroke="currentColor" stroke-width="1.2" opacity="0.5">
+          <path d="M-60 140 C 140 60, 300 240, 220 380 C 160 480, -20 440, -70 350"/>
+          <path d="M-60 180 C 120 110, 260 260, 195 370 C 145 450, 0 420, -55 350"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1.2" opacity="0.4">
+          <path d="M1260 240 C 1100 170, 990 320, 1050 430 C 1100 510, 1250 470, 1280 390"/>
+          <path d="M1260 280 C 1120 220, 1030 340, 1080 425 C 1120 490, 1240 455, 1270 385"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1" opacity="0.45">
+          <circle cx="180" cy="620" r="12"/>
+          <circle cx="180" cy="620" r="24"/>
+          <circle cx="180" cy="620" r="36" opacity="0.6"/>
+        </g>
+        <g fill="currentColor" opacity="0.5">
+          <circle cx="1020" cy="600" r="2.5"/>
+          <circle cx="1060" cy="640" r="1.8"/>
+          <circle cx="560" cy="120" r="2.2"/>
+          <circle cx="600" cy="150" r="1.6"/>
+          <circle cx="880" cy="700" r="2.4"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1.4" opacity="0.45" stroke-linecap="round">
+          <path d="M420 220 v16 M412 228 h16"/>
+          <path d="M760 120 v14 M753 127 h14"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1" opacity="0.3">
+          <path d="M480 720 A 80 80 0 0 1 560 665"/>
+        </g>
+      </svg>
+
+      <div class="absolute inset-0 opacity-[0.35] dark:opacity-[0.5] mix-blend-overlay" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E&quot;)"></div>
+    </div>
+
+    <div class="relative z-10 mx-auto max-w-6xl px-6">
+
+      <div v-motion :initial="{ opacity: 0, y: 24 }" :visible-once="{ opacity: 1, y: 0, transition: { duration: 700, ease: [0.22, 1, 0.36, 1] } }" class="mb-14">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="h-px w-10 bg-blue-600/60"></span>
+          <span class="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600 dark:text-blue-400">
+            {{ t('portfolio.eyebrow', 'Selected Work') }}
+          </span>
+        </div>
+
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] max-w-xl">
+            {{ t('portfolio.title_part1') }}
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-400 dark:to-indigo-300">
+              {{ t('portfolio.title_part2') }}
+            </span>
+          </h2>
+
+          <div v-if="githubStats.length" class="flex items-center gap-6 lg:gap-8">
+            <div v-for="stat in githubStats" :key="stat.label" class="flex flex-col">
+              <div class="flex items-center gap-1.5 text-slate-900 dark:text-white">
+                <component :is="stat.icon" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span class="text-xl font-bold tabular-nums">{{ stat.value }}</span>
+              </div>
+              <span class="text-[11px] text-slate-500 dark:text-slate-500 mt-0.5">{{ stat.label }}</span>
+            </div>
+            <a
+                :href="`https://github.com/${GITHUB_USERNAME}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              @{{ GITHUB_USERNAME }}
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div
+          v-motion
+          :initial="{ opacity: 0, y: 16 }"
+          :visible-once="{ opacity: 1, y: 0, transition: { duration: 600, delay: 150 } }"
+          class="mb-12"
+      >
+        <div class="inline-flex w-full sm:w-auto p-1 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm dark:shadow-none">
           <button
               v-for="tab in tabs"
               :key="tab.id"
               @click="setTab(tab.id)"
-              class="flex items-center gap-2 px-8 py-3 rounded-[1.5rem] text-xs font-black uppercase tracking-widest transition-all duration-500 relative cursor-pointer"
-              :class="activeTab === tab.id ? 'text-white' : 'text-slate-500 dark:text-slate-400 hover:text-blue-600'"
+              class="relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-300 cursor-pointer whitespace-nowrap"
+              :class="activeTab === tab.id
+              ? 'text-white dark:bg-blue-400'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
           >
             <component :is="tab.icon" class="w-4 h-4" />
-            <span class="hidden sm:block ml-2">{{ t(tab.label) }}</span>
-            <div v-if="activeTab === tab.id" v-motion-layout class="absolute inset-0 bg-blue-600 rounded-[1.5rem] -z-10 shadow-lg shadow-blue-500/40"></div>
+            <span>{{ t(tab.label) }}</span>
+            <span
+                v-if="tab.count.value > 0"
+                class="text-[10px] font-bold px-1.5 py-0.5 rounded-md tabular-nums"
+                :class="activeTab === tab.id
+                ? 'bg-white/20 text-white'
+                : 'bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400'"
+            >
+              {{ tab.count.value }}
+            </span>
+            <div
+                v-if="activeTab === tab.id"
+                v-motion-layout
+                class="absolute inset-0 bg-slate-900 dark:bg-white rounded-xl -z-10 dark:shadow-[0_8px_24px_-8px_rgba(255,255,255,0.25)]"
+                :enter="{ transition: { type: 'spring', damping: 28, stiffness: 320 } }"
+            ></div>
           </button>
         </div>
       </div>
 
-      <ProjectsTab
-          v-if="activeTab === 'projects'"
-          :projectsData="projectsData"
-          :isLoading="isLoadingProjects"
-      />
+      <Transition name="tab-fade" mode="out-in">
+        <ProjectsTab
+            v-if="activeTab === 'projects'"
+            :projectsData="projectsData"
+            :isLoading="isLoadingProjects"
+        />
 
-      <CertificatesTab
-          v-if="activeTab === 'certificates'"
-          :certificatesData="certificatesData"
-      />
+        <CertificatesTab
+            v-else-if="activeTab === 'certificates'"
+            :certificatesData="certificatesData"
+        />
 
-      <TechStackTab
-          v-if="activeTab === 'tech'"
-          :techStack="techStack"
-          :githubProfile="githubProfile"
-          :isLoading="isLoadingTech"
-      />
+        <TechStackTab
+            v-else-if="activeTab === 'tech'"
+            :techStack="techStack"
+            :githubProfile="githubProfile"
+            :isLoading="isLoadingTech"
+        />
+      </Transition>
 
     </div>
   </section>
 </template>
+
+<style scoped>
+.tab-fade-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tab-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.tab-fade-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.tab-fade-leave-to {
+  opacity: 0;
+}
+</style>
