@@ -290,18 +290,18 @@ const profileData = {
               <ChevronRight class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               <span class="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10 dark:ring-black/10"></span>
             </button>
-
             <button
                 @click="handleDownloadCV"
                 :disabled="isCvLoading"
                 class="group w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold text-sm tracking-wide border transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer
-                     border-slate-300 dark:border-white/15 text-slate-900 dark:text-white hover:border-blue-500/60 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-0.5
-                     disabled:opacity-50 disabled:cursor-wait disabled:hover:translate-y-0"
+           border-slate-300 dark:border-white/15 text-slate-900 dark:text-white hover:border-blue-500/60 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-0.5
+           disabled:opacity-50 disabled:cursor-wait disabled:hover:translate-y-0"
             >
-              <FileText v-if="isCvLoading" class="w-4 h-4 animate-pulse" />
-              <ChevronRight v-else-if="!cvUrl" class="w-4 h-4 opacity-40" />
-              <template v-else>{{ t('hero.cv_btn') }}</template>
-              <span v-if="!isCvLoading && cvUrl" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <FileText :class="['w-4 h-4', { 'animate-pulse': isCvLoading }]" />
+
+              <span>{{ t('hero.cv_btn') }}</span>
+
+              <span v-if="!isCvLoading && cvUrl" class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
             </button>
           </div>
 
