@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Code2, Palette, Rocket, Users, Milestone, Terminal, ExternalLink } from 'lucide-vue-next';
+import { Code2, Palette, Rocket, Users, Milestone, ArrowUpRight } from 'lucide-vue-next';
 
 const { t, tm, rt } = useI18n();
 
@@ -13,7 +13,7 @@ const features = computed(() => {
     ...feature,
     title: rt(feature.title),
     description: rt(feature.description),
-    icon: icons[index] || Terminal
+    icon: icons[index] || Code2
   })) : [];
 });
 
@@ -24,111 +24,135 @@ const stats = [
 </script>
 
 <template>
-  <section
-      id="about"
-      class="py-24 relative overflow-hidden transition-colors duration-700 bg-white dark:bg-[#020617]"
-  >
-    <div class="absolute inset-0 z-0 pointer-events-none opacity-40 dark:opacity-20">
-      <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse"></div>
-      <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse delay-2000"></div>
+  <section id="about" class="relative py-28 overflow-hidden bg-slate-50 dark:bg-[#020617]">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div class="absolute inset-0 bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-center opacity-[0.15] dark:opacity-[0.07] [mask-image:radial-gradient(ellipse_70%_60%_at_30%_40%,black,transparent)]"></div>
+
+      <svg
+          class="absolute inset-0 w-full h-full opacity-[0.45] dark:opacity-[0.3] text-slate-400 dark:text-slate-600"
+          style="mask-image: radial-gradient(ellipse 60% 50% at 20% 60%, black, transparent)"
+          preserveAspectRatio="xMidYMid slice"
+          viewBox="0 0 1200 800"
+          fill="none"
+      >
+        <g stroke="currentColor" stroke-width="1.2" opacity="0.5">
+          <path d="M-60 420 C 100 340, 240 500, 180 620 C 130 720, -30 680, -70 590"/>
+          <path d="M-60 460 C 90 390, 210 520, 160 615 C 120 690, -10 660, -55 590"/>
+          <path d="M-60 500 C 80 440, 185 540, 145 610 C 110 665, 5 645, -40 585"/>
+        </g>
+        <g fill="currentColor" opacity="0.5">
+          <circle cx="240" cy="180" r="2.4"/>
+          <circle cx="280" cy="215" r="1.7"/>
+          <circle cx="200" cy="220" r="1.5"/>
+          <circle cx="1060" cy="240" r="2.2"/>
+          <circle cx="1100" cy="280" r="1.6"/>
+          <circle cx="950" cy="640" r="2.4"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1.4" opacity="0.45" stroke-linecap="round">
+          <path d="M520 120 v16 M512 128 h16"/>
+          <path d="M820 560 v14 M813 567 h14"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1" opacity="0.3">
+          <path d="M560 720 A 80 80 0 0 1 640 665"/>
+        </g>
+      </svg>
+
+      <div class="absolute inset-0 opacity-[0.35] dark:opacity-[0.5] mix-blend-overlay" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E&quot;)"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-      <div
-          v-motion
-          :initial="{ opacity: 0, y: 50 }"
-          :visible-once="{ opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } }"
-          class="text-center mb-20"
-      >
-        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">
-          {{ t('about.title_part1') }} <span class="text-gradient font-black">{{ t('about.title_part2') }}</span>
+    <div class="relative z-10 mx-auto max-w-6xl px-6">
+
+      <div v-motion :initial="{ opacity: 0, y: 24 }" :visible-once="{ opacity: 1, y: 0, transition: { duration: 700, ease: [0.22, 1, 0.36, 1] } }" class="mb-16">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="h-px w-10 bg-blue-600/60"></span>
+          <span class="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600 dark:text-blue-400">
+            {{ t('about.eyebrow', 'About Me') }}
+          </span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] max-w-2xl">
+          {{ t('about.title_part1') }}
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-400 dark:to-indigo-300">
+            {{ t('about.title_part2') }}
+          </span>
         </h2>
-        <div class="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-500 mx-auto rounded-full shadow-lg shadow-blue-500/20"></div>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-16 items-center mb-24">
+      <div class="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center mb-24">
         <div
             v-motion
-            :initial="{ opacity: 0, x: -50, rotate: -2 }"
-            :visible-once="{ opacity: 1, x: 0, rotate: 0, transition: { duration: 800, type: 'spring' } }"
+            :initial="{ opacity: 0, y: 24 }"
+            :visible-once="{ opacity: 1, y: 0, transition: { duration: 700, ease: [0.22, 1, 0.36, 1] } }"
             class="relative group"
         >
-          <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-indigo-500 rounded-[2.5rem] blur-2xl opacity-10 group-hover:opacity-30 transition-opacity duration-700"></div>
-          <div class="relative rounded-[2.5rem] overflow-hidden border-8 border-white dark:border-slate-800 shadow-2xl aspect-[4/3] bg-slate-100 dark:bg-slate-900">
+          <div class="absolute -inset-0 translate-x-4 translate-y-4 rounded-2xl border border-blue-500/30 dark:border-blue-400/20 transition-transform duration-500 group-hover:translate-x-2.5 group-hover:translate-y-2.5"></div>
+
+          <div class="relative rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 aspect-[4/3] shadow-[0_25px_60px_-20px_rgba(2,6,23,0.35)] dark:shadow-[0_25px_60px_-20px_rgba(0,0,0,0.6)]">
             <img
                 src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop"
                 alt="Developer workspace"
-                class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
-            />
+                loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent pointer-events-none"></div>
           </div>
-          <div class="absolute -bottom-6 -right-6 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl border border-slate-100 dark:border-white/5 hidden md:block animate-bounce-slow">
-            <Terminal class="w-10 h-10 text-blue-600" />
-          </div>
+
         </div>
 
         <div
             v-motion
-            :initial="{ opacity: 0, x: 50 }"
-            :visible-once="{ opacity: 1, x: 0, transition: { duration: 800, delay: 200 } }"
-            class="space-y-8"
+            :initial="{ opacity: 0, y: 24 }"
+            :visible-once="{ opacity: 1, y: 0, transition: { duration: 700, delay: 150, ease: [0.22, 1, 0.36, 1] } }"
         >
-          <h3 class="text-3xl font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest text-sm">
-            {{ t('about.subtitle') }}
-          </h3>
+          <p class="text-xl md:text-2xl font-semibold leading-relaxed text-slate-900 dark:text-white mb-6">
+            {{ t('about.desc_1') }}
+          </p>
+          <p class="text-base md:text-lg leading-relaxed text-slate-600 dark:text-slate-400 mb-10">
+            {{ t('about.desc_2') }}
+          </p>
 
-          <div class="space-y-6">
-            <p class="text-slate-600 dark:text-slate-300 text-lg leading-relaxed font-medium italic border-l-4 border-blue-600 pl-6">
-              {{ t('about.desc_1') }}
-            </p>
-            <p class="text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
-              {{ t('about.desc_2') }}
-            </p>
-          </div>
-
-          <div class="flex flex-wrap gap-8 pt-6">
-            <div v-for="(stat, sIdx) in stats" :key="sIdx" class="flex items-center gap-4 group">
-              <div class="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
-                <component :is="stat.icon" class="w-6 h-6 text-blue-600" />
+          <!-- Stats -->
+          <div class="flex items-center gap-10 mb-10">
+            <div v-for="(stat, sIdx) in stats" :key="sIdx" class="flex items-center gap-3.5">
+              <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400">
+                <component :is="stat.icon" class="w-5 h-5" />
               </div>
               <div class="flex flex-col">
-                <span class="text-slate-900 dark:text-white font-black text-3xl tracking-tighter italic">{{ stat.value }}</span>
-                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest">{{ t(stat.label) }}</span>
+                <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">{{ stat.value }}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-500">{{ t(stat.label) }}</span>
               </div>
             </div>
           </div>
 
-          <div class="pt-4">
-            <a
-                href="https://my-blogger-ivory.vercel.app/"
-                target="_blank"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 transition-all duration-300 border border-slate-200 dark:border-white/10 shadow-sm group"
-            >
-              {{ t('about.read_more') }}
-              <ExternalLink class="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
-          </div>
-
+          <a
+              href="https://my-blogger-ivory.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-white/15 px-6 py-3 text-sm font-semibold text-slate-900 dark:text-white transition-all duration-200 hover:border-blue-500/60 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-0.5"
+          >
+            {{ t('about.read_more') }}
+            <ArrowUpRight class="w-4 h-4 opacity-60 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
         </div>
       </div>
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div
             v-for="(feature, index) in features"
             :key="feature.title"
             v-motion
-            :initial="{ opacity: 0, y: 30 }"
-            :visible-once="{ opacity: 1, y: 0, transition: { duration: 600, delay: 400 + (index * 100) } }"
-            class="p-8 bg-slate-50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[2rem] border border-slate-200 dark:border-white/5 hover:border-blue-500/40 transition-all duration-500 hover:-translate-y-3 group shadow-sm hover:shadow-2xl hover:shadow-blue-500/10"
+            :initial="{ opacity: 0, y: 20 }"
+            :visible-once="{ opacity: 1, y: 0, transition: { duration: 500, delay: index * 80, ease: [0.22, 1, 0.36, 1] } }"
+            class="group relative rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-[0_20px_50px_-20px_rgba(2,6,23,0.25)] dark:hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
         >
-          <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 group-hover:rotate-6 transition-all">
-            <component :is="feature.icon" class="w-8 h-8 text-blue-600" />
+          <span class="absolute inset-x-6 top-0 h-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+
+          <div class="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/5 text-blue-600 dark:text-blue-400 transition-colors duration-300 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-500">
+            <component :is="feature.icon" class="w-5 h-5" />
           </div>
-          <h4 class="text-xl font-black mb-3 text-slate-900 dark:text-white tracking-tight">{{ feature.title }}</h4>
-          <p class="text-slate-600 dark:text-gray-400 text-sm leading-relaxed font-medium">{{ feature.description }}</p>
+          <h4 class="mb-2 text-base font-bold tracking-tight text-slate-900 dark:text-white">{{ feature.title }}</h4>
+          <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-400">{{ feature.description }}</p>
         </div>
       </div>
     </div>
   </section>
 </template>
-
-Lanjut untuk aboutnya
