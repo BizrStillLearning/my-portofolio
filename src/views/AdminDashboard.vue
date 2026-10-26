@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { supabase } from '../supabase';
 import Swal from 'sweetalert2';
 import { useThemeStore } from "../stores/themeStore.js";
-import { LayoutDashboard, Trophy, FileText, LogOut } from 'lucide-vue-next';
+import { LayoutDashboard, Trophy, FileText, LogOut, ArrowRight } from 'lucide-vue-next';
 
 import CertificateManager from '../components/admin/CertificateManager.vue';
 import CVManager from '../components/admin/CVManager.vue';
@@ -81,6 +81,17 @@ const handleLogout = () => {
               <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Sistem Status</p>
               <h3 class="text-sm font-black text-slate-900 dark:text-white mt-2">Semua Layanan Berjalan</h3>
             </div>
+          </div>
+
+          <div @click="activeMenu = 'certificates'" class="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-500/40 hover:shadow-md transition-all group">
+            <div class="flex items-center gap-4">
+              <div class="p-4 bg-blue-500/10 rounded-2xl text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform"><Trophy class="w-6 h-6" /></div>
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Kelola Sertifikat</p>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white mt-1">Edit, Tambah & Arsipkan</h3>
+              </div>
+            </div>
+            <ArrowRight class="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
           </div>
         </div>
       </div>

@@ -9,6 +9,10 @@ const props = defineProps({
   certificatesData: {
     type: Array,
     required: true
+  },
+  isLoading: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -91,7 +95,7 @@ const isPdf = (url) => {
 <template>
   <div class="space-y-8">
 
-    <div v-if="certificatesData.length > 0" class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+    <div v-if="!isLoading && certificatesData.length > 0" class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
       <div class="relative w-full sm:w-72">
         <Search class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         <input
@@ -115,7 +119,8 @@ const isPdf = (url) => {
       </div>
     </div>
 
-    <div v-if="certificatesData.length === 0" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Skeleton Loading -->
+    <div v-if="isLoading" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="n in 3" :key="n" class="animate-pulse rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 overflow-hidden">
         <div class="h-40 bg-slate-200 dark:bg-white/10"></div>
         <div class="p-5 space-y-3">
@@ -126,6 +131,15 @@ const isPdf = (url) => {
       </div>
     </div>
 
+    <!-- Empty State if no public certificates -->
+    <div v-else-if="certificatesData.length === 0" class="py-20 text-center">
+      <ShieldCheck class="w-10 h-10 mx-auto mb-4 text-slate-300 dark:text-slate-700" />
+      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+        Belum ada sertifikat publik yang ditampilkan.
+      </p>
+    </div>
+
+    <!-- Empty State if search yields no results -->
     <div v-else-if="filteredAndSortedCerts.length === 0" class="py-16 text-center">
       <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
         Tidak ada sertifikat yang cocok dengan "<span class="text-slate-900 dark:text-white font-semibold">{{ searchQuery }}</span>".
@@ -138,10 +152,11 @@ const isPdf = (url) => {
       </button>
     </div>
 
+    <!-- Certificates Grid -->
     <div v-else class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
       <div
           v-for="(cert, cIdx) in filteredAndSortedCerts"
-          :key="cIdx"
+          :key="cert.id || cIdx"
           v-motion
           :initial="{ opacity: 0, y: 20 }"
           :enter="{ opacity: 1, y: 0, transition: { duration: 500, delay: cIdx * 60, ease: [0.22, 1, 0.36, 1] } }"

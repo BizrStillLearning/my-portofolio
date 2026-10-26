@@ -12,6 +12,7 @@ const { t } = useI18n();
 const activeTab = ref('projects');
 
 const certificatesFromDB = ref([]);
+const isLoadingCertificates = ref(false);
 const projectsFromDB = ref([]);
 const techStack = ref([]);
 const githubProfile = ref(null);
@@ -20,9 +21,14 @@ const isLoadingTech = ref(false);
 
 const GITHUB_USERNAME = 'BizrStillLearning';
 
+// Filter out archived certificates for the public view
+const publicCertificates = computed(() => {
+  return certificatesFromDB.value.filter(cert => !cert.is_archived);
+});
+
 const tabs = [
   { id: 'projects', label: 'portfolio.tabs.projects', icon: Code2, count: computed(() => projectsFromDB.value.length) },
-  { id: 'certificates', label: 'portfolio.tabs.certificates', icon: Trophy, count: computed(() => certificatesFromDB.value.length) },
+  { id: 'certificates', label: 'portfolio.tabs.certificates', icon: Trophy, count: computed(() => publicCertificates.value.length) },
   { id: 'tech', label: 'portfolio.tabs.tech', icon: Layers, count: computed(() => techStack.value.length) },
 ];
 
@@ -46,15 +52,21 @@ const techMap = {
 
 const fetchCertificates = async () => {
   try {
+    isLoadingCertificates.value = true;
     const { data, error } = await supabase
         .from('certificates')
         .select('*')
         .order('created_at', { ascending: false });
 
     if (error) throw error;
-    certificatesFromDB.value = data || [];
+    certificatesFromDB.value = (data || []).map(item => ({
+      ...item,
+      is_archived: Boolean(item.is_archived)
+    }));
   } catch (error) {
     console.error('Error fetching certificates:', error.message);
+  } finally {
+    isLoadingCertificates.value = false;
   }
 };
 
@@ -189,12 +201,13 @@ const getImageUrl = (imagePath) => {
   if (imagePath.startsWith('http')) return imagePath;
 
   const { data } = supabase.storage.from('certificates').getPublicUrl(imagePath);
-  return data.publicUrl;
+  return data?.publicUrl || '';
 };
 
 const certificatesData = computed(() => {
-  return certificatesFromDB.value.map((cert) => {
+  return publicCertificates.value.map((cert) => {
     return {
+      id: cert.id,
       title: cert.title,
       issuer: cert.issuer,
       date: cert.date,
@@ -351,6 +364,7 @@ const githubStats = computed(() => {
         <CertificatesTab
             v-else-if="activeTab === 'certificates'"
             :certificatesData="certificatesData"
+            :isLoading="isLoadingCertificates"
         />
 
         <TechStackTab
